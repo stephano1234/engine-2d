@@ -28,8 +28,8 @@ public class Player extends GameObject {
 	
 	private boolean isLandingAnimation = false;
 	
-	public Player(int tileX, int tileY) {
-		super("player", tileX, tileY, TILE_SIZE, TILE_SIZE, 4, 2, 6, 5);
+	public Player(int positionX, int positionY) {
+		super("player", positionX, positionY);
 		this.disabled = false;
 		this.passThroughtCollision = false;
 		this.isOnFloor = false;
@@ -38,6 +38,12 @@ public class Player extends GameObject {
 //		this.verticalVelocity = Engine.UPDATE_CAP * TILE_SIZE * 6f;
 		this.gravityAcceleration = Engine.UPDATE_CAP * TILE_SIZE;
 		this.jumpInitialVelocity = -Engine.UPDATE_CAP * TILE_SIZE * 20f;
+		this.width = TILE_SIZE;
+		this.height = TILE_SIZE;
+		this.paddingTop = 4;
+		this.paddingBottom = 2;
+		this.paddingLeft = 6;
+		this.paddingRight = 5;
 		this.addAxisAlignedBoundingBox();
 	}
 

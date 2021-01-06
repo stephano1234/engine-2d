@@ -91,7 +91,7 @@ public class Engine implements Runnable {
 				this.renderer.clear();
 	
 				// draw elements on the frame and define its pixels lightness and darkness
-				this.gameRunner.renderFrame(this);
+				this.gameRunner.renderFrame(this.renderer);
 
 				// process lightness and darkness of the pixels
 				this.renderer.enlight();

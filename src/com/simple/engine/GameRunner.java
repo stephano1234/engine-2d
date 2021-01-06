@@ -32,7 +32,7 @@ public abstract class GameRunner {
 	
 	protected abstract void defineLogicalStep(Engine engine);
 	
-	protected abstract void defineFrame(Engine engine);
+	protected abstract void defineFrame(Renderer renderer);
 	
 	public void run() {
 		this.engine.start();
@@ -50,13 +50,15 @@ public abstract class GameRunner {
 		
 	}
 	
-	public void renderFrame(Engine engine) {
+	public void renderFrame(Renderer renderer) {
 
-		this.defineFrame(engine);
-
-		this.renderPhase(engine);
+		this.updateCameraPosition(renderer);
 		
-		this.renderGameObjects(engine.getRenderer());
+		this.defineFrame(renderer);
+
+		this.renderPhase(renderer);
+		
+		this.renderGameObjects(renderer);
 	
 	}
 
@@ -78,8 +80,8 @@ public abstract class GameRunner {
 		}
 	}
 
-	private void renderPhase(Engine engine) {
-		this.currentPhase.render(engine);
+	private void renderPhase(Renderer renderer) {
+		this.currentPhase.render(renderer);
 	}
 	
 	private void changePhaseStep() {
@@ -91,20 +93,20 @@ public abstract class GameRunner {
 	
 	private void loadPhase() {
 		this.currentPhase = this.getPhaseByTag(this.currentPhaseTag);
-		TileEventMap collisionMap = this.currentPhase.getCollisionMap();
-		for (GameObject gameObject : this.gameObjects) {
-			gameObject.setCollisionMap(collisionMap);
-		}
 	}
 
 	public Camera getCamera() {
 		return camera;
 	}
 
-	public void setCamera(Camera camera) {
-		this.camera = camera;
+	public void setGameObjectFixedCamera(String tag) {
+		this.camera = new Camera(tag, this);
 	}
 
+	private void updateCameraPosition(Renderer renderer) {
+		renderer.setCameraPosition(this.getCamera());
+	}
+	
 	public void addPhase(Phase phase) {
 		this.phases.add(phase);
 	}

@@ -5,7 +5,7 @@ public abstract class Component {
 	protected String tag;
 	
 	protected GameObject gameObject;
-
+	
 	protected Component(String tag, GameObject gameObject) {
 		this.tag = tag;
 		this.gameObject = gameObject;

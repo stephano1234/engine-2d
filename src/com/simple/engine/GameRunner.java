@@ -7,8 +7,6 @@ public abstract class GameRunner {
 	
 	public static final int TILE_SIZE = 16;
 	
-	public static final int HALF_TILE_SIZE = TILE_SIZE / 2;
-	
 	private Engine engine;
 	
 	private Camera camera;
@@ -40,13 +38,21 @@ public abstract class GameRunner {
 	
 	public void loopLogicalStep(Engine engine) {
 				
-		this.changePhaseStep();
+		this.loadPhaseStep();
 		
 		this.defineLogicalStep(engine);
 		
-		this.updateGameObjectsStates(engine.getInput());
+		this.clearGameObjectsOffsets();
 		
+		this.updateGameObjectsOffsets(engine.getInput());
+		
+		this.updateGameObjectsComponents();
+
 		GamePhysic.updateAxisAlignedBoundingBox();
+
+		this.updateGameObjectsAnimations(engine.getInput());
+
+		this.updateGameObjectsPosition();
 		
 	}
 	
@@ -68,15 +74,39 @@ public abstract class GameRunner {
 		}
 	}
 	
-	private void updateGameObjectsStates(Input input) {
+	private void clearGameObjectsOffsets() {
+		for (GameObject gameObject : this.gameObjects) {
+			gameObject.clearOffsets();
+		}
+	}
+	
+	private void updateGameObjectsOffsets(Input input) {
 		int i = 0;
 		while (i < this.gameObjects.size()) {			
 			if (this.gameObjects.get(i).isDisabled()) {
 				this.gameObjects.remove(i);
 			} else {
-				this.gameObjects.get(i).updateObjectState(input);
+				this.gameObjects.get(i).updateObjectOffset(input);
 				i++;
 			}
+		}
+	}
+
+	private void updateGameObjectsComponents() {
+		for (GameObject gameObject : this.gameObjects) {
+			gameObject.updateComponents();
+		}
+	}
+
+	private void updateGameObjectsAnimations(Input input) {
+		for (GameObject gameObject : this.gameObjects) {
+			gameObject.updateObjectAnimation(input);
+		}
+	}
+	
+	private void updateGameObjectsPosition() {
+		for (GameObject gameObject : this.gameObjects) {
+			gameObject.updatePosition();
 		}
 	}
 
@@ -84,17 +114,13 @@ public abstract class GameRunner {
 		this.currentPhase.render(renderer);
 	}
 	
-	private void changePhaseStep() {
+	private void loadPhaseStep() {
 		if (this.isChangePhaseLogicalStep) {
 			this.isChangePhaseLogicalStep = false;
-			this.loadPhase();
+			this.currentPhase = this.getPhaseByTag(this.currentPhaseTag);
 		}
 	}
 	
-	private void loadPhase() {
-		this.currentPhase = this.getPhaseByTag(this.currentPhaseTag);
-	}
-
 	public Camera getCamera() {
 		return camera;
 	}

@@ -3,23 +3,26 @@ package com.simple.game;
 import com.simple.engine.Engine;
 import com.simple.engine.GameObject;
 import com.simple.engine.GameRunner;
+import com.simple.engine.Image;
+import com.simple.engine.Input;
 import com.simple.engine.Phase;
 import com.simple.engine.Renderer;
-import com.simple.engine.TileImageMap;
 
 public class GameManager extends GameRunner {
 	
 	public GameManager() {
 		super();
-		this.addGameObject(new Player(50, 10));
 		this.addGameObject(new GameObject("teste", 50, 200) {
-			
+						
 			private boolean isIn = false;
 			
+			private int dirCount = 0;
+				
 			@Override
 			protected void setConfigs() {
 				this.width = TILE_SIZE * 2;
 				this.height = TILE_SIZE;
+				this.verticalVelocity = Engine.UPDATE_CAP * TILE_SIZE * 4f;
 				this.addAxisAlignedBoundingBox();
 			}
 			
@@ -27,7 +30,21 @@ public class GameManager extends GameRunner {
 			public void applyAxisAlignedBoundingBoxEvent(GameObject other) {
 				this.isIn = true;
 			}
-
+			
+			@Override
+			public void updateObjectAnimation(Input input) {
+				if (this.dirCount <= 250) {					
+					this.offsetY += this.verticalVelocity;
+					this.dirCount++;
+				} else if (this.dirCount > 250 && this.dirCount < 500) {
+					this.offsetY -= this.verticalVelocity;
+					this.dirCount++;
+				} else {
+					this.offsetY -= this.verticalVelocity;
+					this.dirCount = 0;
+				}
+			}
+			
 			@Override
 			public void renderObject(Renderer renderer) {
 				int color = 0xff000000;
@@ -39,10 +56,73 @@ public class GameManager extends GameRunner {
 			}
 
 		});
+		this.addGameObject(new GameObject("teste2", 100, 448) {
+			
+			private boolean isIn = false;
+			
+			private int dirCount = 0;
+				
+			@Override
+			protected void setConfigs() {
+				this.width = TILE_SIZE * 2;
+				this.height = TILE_SIZE;
+				this.horizontalVelocity = Engine.UPDATE_CAP * TILE_SIZE * 4f;
+				this.addAxisAlignedBoundingBox();
+			}
+			
+			@Override
+			public void applyAxisAlignedBoundingBoxEvent(GameObject other) {
+				if (!other.getTag().equals("floor")) {					
+					this.isIn = true;
+				}
+			}
+			
+			@Override
+			public void updateObjectAnimation(Input input) {
+				if (this.dirCount <= 150) {					
+					this.offsetX += this.horizontalVelocity;
+					this.dirCount++;
+				} else if (this.dirCount > 150 && this.dirCount < 300) {
+					this.offsetX -= this.horizontalVelocity;
+					this.dirCount++;
+				} else {
+					this.offsetX -= this.horizontalVelocity;
+					this.dirCount = 0;
+				}
+			}
+			
+			@Override
+			public void renderObject(Renderer renderer) {
+				int color = 0xff000000;
+				if (this.isIn) {
+					this.isIn = false;
+					color = 0xffff0000;
+				}
+				renderer.drawFilledRect(this.width, this.height, color, this.positionX, this.positionY);
+			}
+
+		});
+		this.addGameObject(new GameObject("floor", 0, 464) {
+			
+			@Override
+			protected void setConfigs() {
+				this.width = TILE_SIZE * 40;
+				this.height = TILE_SIZE;
+				this.addAxisAlignedBoundingBox();
+			}
+			
+			@Override
+			public void renderObject(Renderer renderer) {
+				Image image = new Image("/images/earth-grass-collision-tile.png");
+				for (int i = 0; i < 40; i++) {					
+					renderer.drawImage(image, i * TILE_SIZE, 464);
+				}
+			}
+
+		});
+		this.addGameObject(new Player(50, 10));
 		Phase phase = new Phase("fase teste");
 		phase.setLandscape("/images/landscape-test.png");
-		TileImageMap floor = new TileImageMap("/images/earth-grass-image-map.png", "/images/earth-grass-collision-tile.png", "floor");
-		phase.addTileImageMap(floor);
 		this.addPhase(phase);
 		this.setCurrentPhaseTag(phase.getTag());
 		this.setGameObjectFixedCamera("player");

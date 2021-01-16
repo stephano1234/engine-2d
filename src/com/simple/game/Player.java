@@ -28,15 +28,14 @@ public class Player extends GameObject {
 	
 	private boolean isLandingAnimation = false;
 	
+	private GameObject belowMovingGameObject;
+	
 	public Player(int positionX, int positionY) {
 		super("player", positionX, positionY);
-		this.disabled = false;
-		this.passThroughtCollision = false;
 		this.isOnFloor = false;
 		this.isUnderGravityEffect = true;
 		this.horizontalVelocity = Engine.UPDATE_CAP * TILE_SIZE * 6f;
-//		this.verticalVelocity = Engine.UPDATE_CAP * TILE_SIZE * 6f;
-		this.gravityAcceleration = Engine.UPDATE_CAP * TILE_SIZE;
+		this.gravityAcceleration = Engine.UPDATE_CAP * TILE_SIZE * 1f;
 		this.jumpInitialVelocity = -Engine.UPDATE_CAP * TILE_SIZE * 20f;
 		this.width = TILE_SIZE;
 		this.height = TILE_SIZE;
@@ -49,24 +48,32 @@ public class Player extends GameObject {
 
 	@Override
 	public void applyAxisAlignedBoundingBoxEvent(GameObject other) {
-		if (this.offsetX != 0) {
-			if (this.offsetX > 0) {
-				this.positionX = other.getPositionX() - this.width + this.paddingRight;		
-			} else {
-				this.positionX = other.getPositionX() + other.getWidth() - this.paddingLeft;
-			}
-//			this.offsetX = 0;
+		int disX = 0;
+		int disY = 0;
+		if (this.positionY <= other.getPositionY()) {
+			disY = other.getPositionY() + other.getOffsetY() - (this.positionY + this.offsetY + this.height - this.paddingBottom);
+		} else {
+			disY = other.getPositionY() + other.getOffsetY() + other.getHeight() - (this.positionY + this.offsetY + this.paddingTop);
 		}
-//		if (this.offsetY != 0) {
-//			if (this.offsetY > 0) {
-//				this.positionY = other.getPositionY() - this.height + this.paddingBottom;		
-//				this.fallVelocity = 0;
-//				this.isOnFloor = true;
-//			} else {
-//				this.positionY = other.getPositionY() + other.getHeight() - this.paddingTop;
-//			}
-//			this.offsetY = 0;
-//		}
+		if (this.positionX <= other.getPositionX()) {
+			disX = other.getPositionX() + other.getOffsetX() - (this.positionX + this.offsetX + this.width - this.paddingRight);			
+		} else {
+			disX = other.getPositionX() + other.getOffsetX() + other.getWidth() - (this.positionX + this.offsetX + this.paddingLeft);			
+		}
+		if (Math.abs(disX) < Math.abs(disY)) {
+			disX += this.offsetX;
+			this.offsetX = disX;
+		} else {
+			if (this.positionY <= other.getPositionY()) {
+				this.belowMovingGameObject = other;
+				this.isOnFloor = true;
+				this.fallVelocity = this.fallVelocity > 0 ? 0 : this.fallVelocity;
+			} else {
+				this.fallVelocity = this.fallVelocity < 0 ? 0 : this.fallVelocity;
+			}
+			disY += this.offsetY;
+			this.offsetY = disY;
+		}
 	}
 	
 	@Override
@@ -78,14 +85,6 @@ public class Player extends GameObject {
 			this.jump();
 		}
 		
-//		if (engine.getInput().isKey(KeyEvent.VK_UP)) {
-//			this.offsetY -= Math.round(this.verticalVelocity);
-//		}
-//
-//		if (engine.getInput().isKey(KeyEvent.VK_DOWN)) {
-//			this.offsetY += Math.round(this.verticalVelocity);
-//		}
-
 		if (input.isKey(KeyEvent.VK_LEFT)) {
 			this.moveLeft();
 		}
@@ -97,17 +96,17 @@ public class Player extends GameObject {
 	}
 
 	@Override
-	public void applyObjectAnimation() {
+	public void updateObjectAnimation(Input input) {
 		
 		// walking and jump animation
-		if (this.offsetX == 0) {
+		if (!input.isKey(KeyEvent.VK_LEFT) && !input.isKey(KeyEvent.VK_RIGHT)) {
 			if (this.isOnFloor) {				
 				this.imgTileX = 0;			
 			} else {
 				this.imgTileX = 1;
 			}
 		} else {
-			this.imgTileY = this.offsetX > 0 ? 1 : 0;
+			this.imgTileY = input.isKey(KeyEvent.VK_RIGHT) ? 1 : 0;
 			if (this.isOnFloor) {
 				if (this.walkAnimationCounter > this.walkAnimationDuration) {					
 					this.imgTileX += 1;
@@ -131,6 +130,13 @@ public class Player extends GameObject {
 				this.landAnimationCounter = 0;
 				this.isLandingAnimation = false;
 			}			
+		}
+
+		// follow the below moving game object
+		if (this.belowMovingGameObject != null && this.isOnFloor) {
+//			System.out.println(this.belowMovingGameObject.getTag());
+			this.offsetX += this.belowMovingGameObject.getOffsetX();
+			this.offsetY += this.belowMovingGameObject.getOffsetY();
 		}
 
 	}

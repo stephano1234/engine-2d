@@ -20,13 +20,13 @@ public class GamePhysic {
 				GameObject gb1 = axisAlignedBoundingBoxList.get(j).getGameObject();
 				if 
 					(
-					gb0.getPositionX() + gb0.getPaddingLeft() < gb1.getPositionX() + gb1.getWidth() - gb1.getPaddingRight()
+					gb0.getPositionX() + gb0.getOffsetX() + gb0.getPaddingLeft() <= gb1.getPositionX() + gb1.getOffsetX() + gb1.getWidth() - gb1.getPaddingRight()
 					&&
-					gb1.getPositionX() + gb1.getPaddingLeft() < gb0.getPositionX() + gb0.getWidth() - gb0.getPaddingRight()
+					gb1.getPositionX() + gb1.getOffsetX() + gb1.getPaddingLeft() <= gb0.getPositionX() + gb0.getOffsetX() + gb0.getWidth() - gb0.getPaddingRight()
 					&&
-					gb0.getPositionY() + gb0.getPaddingTop() < gb1.getPositionY() + gb1.getHeight() - gb1.getPaddingBottom()
+					gb0.getPositionY()  + gb0.getOffsetY() + gb0.getPaddingTop() <= gb1.getPositionY() + gb1.getOffsetY() + gb1.getHeight() - gb1.getPaddingBottom()
 					&&
-					gb1.getPositionY() + gb1.getPaddingTop() < gb0.getPositionY() + gb0.getHeight() - gb0.getPaddingBottom()
+					gb1.getPositionY() + gb1.getOffsetY() + gb1.getPaddingTop() <= gb0.getPositionY() + gb0.getOffsetY() + gb0.getHeight() - gb0.getPaddingBottom()
 					)
 				{
 					gb0.applyAxisAlignedBoundingBoxEvent(gb1);
@@ -36,4 +36,5 @@ public class GamePhysic {
 		}
 		axisAlignedBoundingBoxList.clear();
 	}
+
 }

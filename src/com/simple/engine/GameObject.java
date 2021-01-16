@@ -41,8 +41,6 @@ public abstract class GameObject {
 	
 	protected boolean wasOnFloor = false;
 
-	protected boolean passThroughtCollision = false;
-	
 	protected boolean isUnderGravityEffect = true;
 	
 	protected boolean disabled = false;
@@ -61,29 +59,13 @@ public abstract class GameObject {
 		// implement this method to set the initial configurations of this game object
 	}
 	
-	public void updateObjectState(Input input) {
-		
-		this.clearOffsets();
+	public void updateObjectOffset(Input input) {
 		
 		if (this.isUnderGravityEffect) {
 			this.calculateGravityVariables();
 		}
 		
 		this.applyControlEvents(input);
-		
-		this.updateOffsets();
-		
-		this.applyObjectAnimation();
-
-		this.updateComponents();
-		
-		// ------------
-		if (!this.passThroughtCollision) {			
-			this.calculateCollision();
-		}
-		// ------------
-		
-		this.updatePosition();
 		
 	}
 
@@ -93,34 +75,29 @@ public abstract class GameObject {
 		// implement this method if this game object is controlled by the player
 	}
 
-	public void applyObjectAnimation() {
+	public void updateObjectAnimation(Input input) {
 		// implement this method to define this game object animations
 	}
 	
-	private void updateComponents() {
+	public void updateComponents() {
+		// reset on the floor check
+		this.isOnFloor = false;
+		// update the components
 		for (Component component : this.components) {
 			component.update();
 		}
-	}
-	
-	private void addComponent(Component component) {
-		this.components.add(component);
 	}
 	
 	public void applyAxisAlignedBoundingBoxEvent(GameObject other) {
 		// implement this method if this game object is an axis aligned bounding box component
 	}
 	
-	private void clearOffsets() {
+	public void clearOffsets() {
 		this.offsetX = 0;
 		this.offsetY = 0;
 	}
 
-	private void updateOffsets() {
-		this.offsetY += Math.round(this.fallVelocity);		
-	}
-	
-	private void updatePosition() {
+	public void updatePosition() {
 		this.positionX += this.offsetX;
 		this.positionY += this.offsetY;
 	}
@@ -128,22 +105,20 @@ public abstract class GameObject {
 	private void calculateGravityVariables() {
 		// check if it's actually on the floor in the last update
 		this.wasOnFloor = this.isOnFloor;
-		// check if it's actually on the floor
-
 		// calculate gravity
-		this.fallVelocity += this.gravityAcceleration;
-	}
-	
-	private void calculateCollision() {
-		
+		if (!this.isOnFloor) {			
+			this.fallVelocity += this.gravityAcceleration;
+			this.offsetY += Math.round(this.fallVelocity);		
+		}
 	}
 	
 	protected void addAxisAlignedBoundingBox() {
-		this.addComponent(new AxisAlignedBoundingBox(this));
+		this.components.add(new AxisAlignedBoundingBox(this));
 	}
 	
 	protected void jump() {
-		this.fallVelocity = this.jumpInitialVelocity;
+		this.fallVelocity = Math.round(this.jumpInitialVelocity);
+		this.offsetY = Math.round(this.jumpInitialVelocity);
 	}
 
 	protected void moveRight() {
@@ -153,7 +128,7 @@ public abstract class GameObject {
 	protected void moveLeft() {
 		this.offsetX -= Math.round(this.horizontalVelocity);
 	}
-	
+
 	// conventional getters and setters
 	
 	public String getTag() {
@@ -194,6 +169,22 @@ public abstract class GameObject {
 
 	public void setPositionY(int positionY) {
 		this.positionY = positionY;
+	}
+
+	public int getOffsetX() {
+		return offsetX;
+	}
+
+	public void setOffsetX(int offsetX) {
+		this.offsetX = offsetX;
+	}
+
+	public int getOffsetY() {
+		return offsetY;
+	}
+
+	public void setOffsetY(int offsetY) {
+		this.offsetY = offsetY;
 	}
 
 	public int getPaddingTop() {

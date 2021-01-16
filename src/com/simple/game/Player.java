@@ -66,7 +66,7 @@ public class Player extends GameObject {
 		} else {
 			if (this.positionY <= other.getPositionY()) {
 				this.belowMovingGameObject = other;
-				this.isOnFloor = true;
+				this.isOnFloor = this.fallVelocity >= 0;
 				this.fallVelocity = this.fallVelocity > 0 ? 0 : this.fallVelocity;
 			} else {
 				this.fallVelocity = this.fallVelocity < 0 ? 0 : this.fallVelocity;

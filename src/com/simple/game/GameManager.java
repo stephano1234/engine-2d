@@ -33,10 +33,10 @@ public class GameManager extends GameRunner {
 			
 			@Override
 			public void updateObjectAnimation(Input input) {
-				if (this.dirCount <= 250) {					
+				if (this.dirCount < 250) {					
 					this.offsetY += this.verticalVelocity;
 					this.dirCount++;
-				} else if (this.dirCount > 250 && this.dirCount < 500) {
+				} else if (this.dirCount >= 250 && this.dirCount < 499) {
 					this.offsetY -= this.verticalVelocity;
 					this.dirCount++;
 				} else {
@@ -79,10 +79,10 @@ public class GameManager extends GameRunner {
 			
 			@Override
 			public void updateObjectAnimation(Input input) {
-				if (this.dirCount <= 150) {					
+				if (this.dirCount < 150) {					
 					this.offsetX += this.horizontalVelocity;
 					this.dirCount++;
-				} else if (this.dirCount > 150 && this.dirCount < 300) {
+				} else if (this.dirCount >= 150 && this.dirCount < 299) {
 					this.offsetX -= this.horizontalVelocity;
 					this.dirCount++;
 				} else {

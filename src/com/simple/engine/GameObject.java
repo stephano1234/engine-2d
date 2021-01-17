@@ -45,6 +45,8 @@ public abstract class GameObject {
 	
 	protected boolean disabled = false;
 	
+	protected GameObject synchronizedOffsetsGameObject;
+	
 	protected List<Component> components = new ArrayList<>();
 	
 	protected GameObject(String tag, int positionX, int positionY) {
@@ -59,24 +61,30 @@ public abstract class GameObject {
 		// implement this method to set the initial configurations of this game object
 	}
 	
-	public void updateObjectOffset(Input input) {
+	public void updateOffsets(Input input) {
 		
 		if (this.isUnderGravityEffect) {
 			this.calculateGravityVariables();
 		}
 		
-		this.applyControlEvents(input);
+		this.updateControlBasedOffsetsChanges(input);
+		
+		this.updateAutomaticOffsetsChanges();
 		
 	}
 
 	public abstract void renderObject(Renderer renderer);
 
-	public void applyControlEvents(Input input) {
+	public void updateControlBasedOffsetsChanges(Input input) {
 		// implement this method if this game object is controlled by the player
 	}
 
-	public void updateObjectAnimation(Input input) {
-		// implement this method to define this game object animations
+	public void updateAutomaticOffsetsChanges() {
+		// implement this method to define this game object automatic moving animations
+	}
+	
+	public void updateImageAnimations(Input input) {
+		// implement this method to define this game object image animations
 	}
 	
 	public void updateComponents() {
@@ -88,7 +96,14 @@ public abstract class GameObject {
 		}
 	}
 	
-	public void applyAxisAlignedBoundingBoxEvent(GameObject other) {
+	public void updateSynchronizedOffsets() {
+		if (this.synchronizedOffsetsGameObject != null && this.isOnFloor) {
+			this.offsetX += this.synchronizedOffsetsGameObject.getOffsetX();
+			this.offsetY += this.synchronizedOffsetsGameObject.getOffsetY();
+		}
+	}
+	
+	public void applyAxisAlignedBoundingBoxCollisionEvent(GameObject other) {
 		// implement this method if this game object is an axis aligned bounding box component
 	}
 	
@@ -106,7 +121,7 @@ public abstract class GameObject {
 		// check if it's actually on the floor in the last update
 		this.wasOnFloor = this.isOnFloor;
 		// calculate gravity
-		if (!this.isOnFloor) {			
+		if (!this.isOnFloor) {
 			this.fallVelocity += this.gravityAcceleration;
 			this.offsetY += Math.round(this.fallVelocity);		
 		}
@@ -114,6 +129,33 @@ public abstract class GameObject {
 	
 	protected void addAxisAlignedBoundingBox() {
 		this.components.add(new AxisAlignedBoundingBox(this));
+	}
+	
+	protected void collideWithoutBouncing(GameObject other) {
+		int minimumDistanceX = 0;
+		int minimumDistanceY = 0;
+		if (this.positionY <= other.getPositionY()) {
+			minimumDistanceY = other.getPositionY() + other.getOffsetY() + other.getPaddingTop() - (this.positionY + this.offsetY + this.height - this.paddingBottom);
+		} else {
+			minimumDistanceY = other.getPositionY() + other.getOffsetY() - other.getPaddingBottom() + other.getHeight() - (this.positionY + this.offsetY + this.paddingTop);
+		}
+		if (this.positionX <= other.getPositionX()) {
+			minimumDistanceX = other.getPositionX() + other.getOffsetX() + other.getPaddingLeft() - (this.positionX + this.offsetX + this.width - this.paddingRight);			
+		} else {
+			minimumDistanceX = other.getPositionX() + other.getOffsetX() - other.getPaddingRight() + other.getWidth() - (this.positionX + this.offsetX + this.paddingLeft);			
+		}
+		if (Math.abs(minimumDistanceX) < Math.abs(minimumDistanceY)) {
+			this.offsetX += minimumDistanceX;
+		} else {
+			if (this.positionY <= other.getPositionY()) {
+				this.synchronizedOffsetsGameObject = other;
+				this.isOnFloor = this.fallVelocity >= 0;
+				this.fallVelocity = this.fallVelocity > 0 ? 0 : this.fallVelocity;
+			} else {
+				this.fallVelocity = this.fallVelocity < 0 ? 0 : this.fallVelocity;
+			}
+			this.offsetY += minimumDistanceY;
+		}
 	}
 	
 	protected void jump() {

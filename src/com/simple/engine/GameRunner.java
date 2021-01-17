@@ -46,11 +46,11 @@ public abstract class GameRunner {
 		
 		this.updateGameObjectsOffsets(engine.getInput());
 		
+		this.updateGameObjectsSynchronizedOffsets();
+		
 		this.updateGameObjectsComponents();
 
-		GamePhysic.updateAxisAlignedBoundingBox();
-
-		this.updateGameObjectsAnimations(engine.getInput());
+		this.updateGameObjectsImagesAnimations(engine.getInput());
 
 		this.updateGameObjectsPosition();
 		
@@ -86,7 +86,7 @@ public abstract class GameRunner {
 			if (this.gameObjects.get(i).isDisabled()) {
 				this.gameObjects.remove(i);
 			} else {
-				this.gameObjects.get(i).updateObjectOffset(input);
+				this.gameObjects.get(i).updateOffsets(input);
 				i++;
 			}
 		}
@@ -96,11 +96,18 @@ public abstract class GameRunner {
 		for (GameObject gameObject : this.gameObjects) {
 			gameObject.updateComponents();
 		}
+		GamePhysic.updateAxisAlignedBoundingBox();
 	}
 
-	private void updateGameObjectsAnimations(Input input) {
+	private void updateGameObjectsImagesAnimations(Input input) {
 		for (GameObject gameObject : this.gameObjects) {
-			gameObject.updateObjectAnimation(input);
+			gameObject.updateImageAnimations(input);
+		}
+	}
+
+	private void updateGameObjectsSynchronizedOffsets() {
+		for (GameObject gameObject : this.gameObjects) {
+			gameObject.updateSynchronizedOffsets();
 		}
 	}
 	

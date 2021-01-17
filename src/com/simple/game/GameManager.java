@@ -4,7 +4,6 @@ import com.simple.engine.Engine;
 import com.simple.engine.GameObject;
 import com.simple.engine.GameRunner;
 import com.simple.engine.Image;
-import com.simple.engine.Input;
 import com.simple.engine.Phase;
 import com.simple.engine.Renderer;
 
@@ -27,12 +26,12 @@ public class GameManager extends GameRunner {
 			}
 			
 			@Override
-			public void applyAxisAlignedBoundingBoxEvent(GameObject other) {
+			public void applyAxisAlignedBoundingBoxCollisionEvent(GameObject other) {
 				this.isIn = true;
 			}
 			
 			@Override
-			public void updateObjectAnimation(Input input) {
+			public void updateAutomaticOffsetsChanges() {
 				if (this.dirCount < 250) {					
 					this.offsetY += this.verticalVelocity;
 					this.dirCount++;
@@ -71,14 +70,14 @@ public class GameManager extends GameRunner {
 			}
 			
 			@Override
-			public void applyAxisAlignedBoundingBoxEvent(GameObject other) {
+			public void applyAxisAlignedBoundingBoxCollisionEvent(GameObject other) {
 				if (!other.getTag().equals("floor")) {					
 					this.isIn = true;
 				}
 			}
 			
 			@Override
-			public void updateObjectAnimation(Input input) {
+			public void updateAutomaticOffsetsChanges() {
 				if (this.dirCount < 150) {					
 					this.offsetX += this.horizontalVelocity;
 					this.dirCount++;
@@ -108,6 +107,7 @@ public class GameManager extends GameRunner {
 			protected void setConfigs() {
 				this.width = TILE_SIZE * 40;
 				this.height = TILE_SIZE;
+				this.paddingTop = 2;
 				this.addAxisAlignedBoundingBox();
 			}
 			

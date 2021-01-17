@@ -28,8 +28,6 @@ public class Player extends GameObject {
 	
 	private boolean isLandingAnimation = false;
 	
-	private GameObject belowMovingGameObject;
-	
 	public Player(int positionX, int positionY) {
 		super("player", positionX, positionY);
 		this.isOnFloor = false;
@@ -40,44 +38,18 @@ public class Player extends GameObject {
 		this.width = TILE_SIZE;
 		this.height = TILE_SIZE;
 		this.paddingTop = 4;
-		this.paddingBottom = 2;
 		this.paddingLeft = 6;
 		this.paddingRight = 5;
 		this.addAxisAlignedBoundingBox();
 	}
 
 	@Override
-	public void applyAxisAlignedBoundingBoxEvent(GameObject other) {
-		int disX = 0;
-		int disY = 0;
-		if (this.positionY <= other.getPositionY()) {
-			disY = other.getPositionY() + other.getOffsetY() - (this.positionY + this.offsetY + this.height - this.paddingBottom);
-		} else {
-			disY = other.getPositionY() + other.getOffsetY() + other.getHeight() - (this.positionY + this.offsetY + this.paddingTop);
-		}
-		if (this.positionX <= other.getPositionX()) {
-			disX = other.getPositionX() + other.getOffsetX() - (this.positionX + this.offsetX + this.width - this.paddingRight);			
-		} else {
-			disX = other.getPositionX() + other.getOffsetX() + other.getWidth() - (this.positionX + this.offsetX + this.paddingLeft);			
-		}
-		if (Math.abs(disX) < Math.abs(disY)) {
-			disX += this.offsetX;
-			this.offsetX = disX;
-		} else {
-			if (this.positionY <= other.getPositionY()) {
-				this.belowMovingGameObject = other;
-				this.isOnFloor = this.fallVelocity >= 0;
-				this.fallVelocity = this.fallVelocity > 0 ? 0 : this.fallVelocity;
-			} else {
-				this.fallVelocity = this.fallVelocity < 0 ? 0 : this.fallVelocity;
-			}
-			disY += this.offsetY;
-			this.offsetY = disY;
-		}
+	public void applyAxisAlignedBoundingBoxCollisionEvent(GameObject other) {
+		this.collideWithoutBouncing(other);
 	}
 	
 	@Override
-	public void applyControlEvents(Input input) {
+	public void updateControlBasedOffsetsChanges(Input input) {
 		
 		// calculate offsets
 
@@ -96,7 +68,7 @@ public class Player extends GameObject {
 	}
 
 	@Override
-	public void updateObjectAnimation(Input input) {
+	public void updateImageAnimations(Input input) {
 		
 		// walking and jump animation
 		if (!input.isKey(KeyEvent.VK_LEFT) && !input.isKey(KeyEvent.VK_RIGHT)) {
@@ -130,13 +102,6 @@ public class Player extends GameObject {
 				this.landAnimationCounter = 0;
 				this.isLandingAnimation = false;
 			}			
-		}
-
-		// follow the below moving game object
-		if (this.belowMovingGameObject != null && this.isOnFloor) {
-//			System.out.println(this.belowMovingGameObject.getTag());
-			this.offsetX += this.belowMovingGameObject.getOffsetX();
-			this.offsetY += this.belowMovingGameObject.getOffsetY();
 		}
 
 	}

@@ -29,8 +29,8 @@ public class GamePhysic {
 					gb1.getPositionY() + gb1.getOffsetY() + gb1.getPaddingTop() <= gb0.getPositionY() + gb0.getOffsetY() + gb0.getHeight() - gb0.getPaddingBottom()
 					)
 				{
-					gb0.applyAxisAlignedBoundingBoxEvent(gb1);
-					gb1.applyAxisAlignedBoundingBoxEvent(gb0);
+					gb0.applyAxisAlignedBoundingBoxCollisionEvent(gb1);
+					gb1.applyAxisAlignedBoundingBoxCollisionEvent(gb0);
 				}
 			}			
 		}

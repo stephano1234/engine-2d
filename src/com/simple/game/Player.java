@@ -50,8 +50,6 @@ public class Player extends GameObject {
 	
 	@Override
 	public void updateControlBasedOffsetsChanges(Input input) {
-		
-		// calculate offsets
 
 		if (input.isKeyDown(KeyEvent.VK_UP) && this.isOnFloor) {
 			this.jump();

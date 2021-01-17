@@ -41,7 +41,7 @@ public abstract class GameObject {
 	
 	protected boolean wasOnFloor = false;
 
-	protected boolean isUnderGravityEffect = true;
+	protected boolean isUnderGravityEffect = false;
 	
 	protected boolean disabled = false;
 	

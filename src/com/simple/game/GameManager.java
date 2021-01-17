@@ -21,6 +21,7 @@ public class GameManager extends GameRunner {
 			protected void setConfigs() {
 				this.width = TILE_SIZE * 2;
 				this.height = TILE_SIZE;
+				this.isUnderGravityEffect = false;
 				this.verticalVelocity = Engine.UPDATE_CAP * TILE_SIZE * 4f;
 				this.addAxisAlignedBoundingBox();
 			}
@@ -65,6 +66,7 @@ public class GameManager extends GameRunner {
 			protected void setConfigs() {
 				this.width = TILE_SIZE * 2;
 				this.height = TILE_SIZE;
+				this.isUnderGravityEffect = false;
 				this.horizontalVelocity = Engine.UPDATE_CAP * TILE_SIZE * 4f;
 				this.addAxisAlignedBoundingBox();
 			}
@@ -107,6 +109,7 @@ public class GameManager extends GameRunner {
 			protected void setConfigs() {
 				this.width = TILE_SIZE * 40;
 				this.height = TILE_SIZE;
+				this.isUnderGravityEffect = false;
 				this.paddingTop = 2;
 				this.addAxisAlignedBoundingBox();
 			}

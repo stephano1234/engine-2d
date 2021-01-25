@@ -10,7 +10,49 @@ import com.simple.engine.Renderer;
 public class GameManager extends GameRunner {
 	
 	public GameManager() {
+
 		super();
+		
+		this.addGameObject(new GameObject("gira-gira", 300, 390) {
+			
+			private boolean isIn = false;
+			
+			private int dirCount = 0;
+				
+			@Override
+			protected void setConfigs() {
+				this.width = 32;
+				this.height = 64;
+				this.isUnderGravityEffect = false;
+				this.addAxisAlignedBoundingBox();
+			}
+			
+			@Override
+			public void applyAxisAlignedBoundingBoxCollisionEvent(GameObject other) {
+				this.isIn = true;
+			}
+			
+			@Override
+			public void updateAutomaticOffsetsChanges() {
+				if (this.dirCount < 628) {
+					this.dirCount++;
+				} else {
+					this.dirCount = 0;
+				}
+			}
+			
+			@Override
+			public void renderObject(Renderer renderer) {
+				int color = 0xff000000;
+				if (this.isIn) {
+					this.isIn = false;
+					color = 0xffff0000;
+				}
+				renderer.drawFilledRectWithRotation(this.width, this.height, color, this.positionX, this.positionY, this.dirCount / 100f);
+			}
+
+		});
+		
 		this.addGameObject(new GameObject("teste", 50, 200) {
 						
 			private boolean isIn = false;
@@ -56,6 +98,7 @@ public class GameManager extends GameRunner {
 			}
 
 		});
+	
 		this.addGameObject(new GameObject("teste2", 100, 448) {
 			
 			private boolean isIn = false;
@@ -103,6 +146,7 @@ public class GameManager extends GameRunner {
 			}
 
 		});
+
 		this.addGameObject(new GameObject("floor", 0, 464) {
 			
 			@Override
@@ -123,12 +167,19 @@ public class GameManager extends GameRunner {
 			}
 
 		});
+		
 		this.addGameObject(new Player(50, 10));
+		
 		Phase phase = new Phase("fase teste");
+		
 		phase.setLandscape("/images/landscape-test.png");
+		
 		this.addPhase(phase);
+		
 		this.setCurrentPhaseTag(phase.getTag());
+		
 		this.setGameObjectFixedCamera("player");
+	
 	}
 
 	@Override

@@ -89,7 +89,7 @@ public class Renderer {
 		this.camX = camera.getOffsetX() - this.pixelWidth / 2;
 		this.camY = camera.getOffsetY() - this.pixelHeight / 2;
 	}
-	
+
 	// draw the all the lights requested and process the lightness of each pixel
 	public void enlight() {
 		// draw the lights
@@ -260,7 +260,7 @@ public class Renderer {
 	}
 
 	// Draw functions
-	
+
 	public void drawLight(Light light, int offsetX, int offsetY) {
 		// adjusts the offsets based on the camera position
 		offsetX -= this.camX;
@@ -315,7 +315,7 @@ public class Renderer {
 			inLineOffset += font.getWidths()[letterIndex];
 		}
 	}
-	
+
 	public void drawImage(Image img, int offsetX, int offsetY) {
 		// adjusts the offsets based on the camera position
 		offsetX -= this.camX;
@@ -417,6 +417,67 @@ public class Renderer {
 		for (int x = renderInitialX; x < renderWidth; x++) {
 			for (int y = renderInitialY; y < renderHeight; y++) {
 				this.setPixel(x + offsetX, y + offsetY, color);
+			}
+		}
+	}
+
+	public void drawFilledRectWithRotation(int width, int height, int color, int offsetX, int offsetY, float rad) {
+		// adjusts the offsets based on the camera position
+		offsetX -= this.camX;
+		offsetY -= this.camY;
+		// get the rotational matrix and its inverse
+		int halfWidth = width / 2;
+		int halfHeight = height / 2;
+		double[][] rotationMatrix = this.getRotationMatrix(rad, halfWidth, halfHeight);
+		double[][] inverseRotationMatrix = this.getInverse3x3Matrix(rotationMatrix);
+		// stock the target render area
+		int targetWidth = width;
+		int targetHeight = height;
+		// calculate the enlarged render area
+		int rotX1 = this.get3x3MatrixProductX(rotationMatrix, 0, 0);
+		int rotY1 = this.get3x3MatrixProductY(rotationMatrix, 0, 0);
+		int rotX2 = this.get3x3MatrixProductX(rotationMatrix, width, 0);
+		int rotY2 = this.get3x3MatrixProductY(rotationMatrix, width, 0);
+		int rotX3 = this.get3x3MatrixProductX(rotationMatrix, 0, height);
+		int rotY3 = this.get3x3MatrixProductY(rotationMatrix, 0, height);
+		int rotX4 = this.get3x3MatrixProductX(rotationMatrix, width, height);
+		int rotY4 = this.get3x3MatrixProductY(rotationMatrix, width, height);
+		int minRotatedCoordX = Math.min(Math.min(rotX1, rotX2), Math.min(rotX3, rotX4));
+		int minRotatedCoordY = Math.min(Math.min(rotY1, rotY2), Math.min(rotY3, rotY4));
+		int maxRotatedCoordX = Math.max(Math.max(rotX1, rotX2), Math.max(rotX3, rotX4));
+		int maxRotatedCoordY = Math.max(Math.max(rotY1, rotY2), Math.max(rotY3, rotY4));
+		width = Math.abs(minRotatedCoordX - maxRotatedCoordX);
+		height = Math.abs(minRotatedCoordY - maxRotatedCoordY);
+		// validating image screen position
+		if (offsetX < -width)
+			return;
+		if (offsetY < -height)
+			return;
+		if (offsetX >= this.pixelWidth)
+			return;
+		if (offsetY >= this.pixelHeight)
+			return;
+		// clipping image on screen size
+		int renderWidth = width + minRotatedCoordX;
+		int renderHeight = height + minRotatedCoordY;
+		int renderInitialX = minRotatedCoordX;
+		int renderInitialY = minRotatedCoordY;
+		if (offsetX < 0)
+			renderInitialX -= offsetX;
+		if (offsetY < 0)
+			renderInitialY -= offsetY;
+		if (offsetX + renderWidth > this.pixelWidth)
+			renderWidth = this.pixelWidth - offsetX;
+		if (offsetY + renderHeight > this.pixelHeight)
+			renderHeight = this.pixelHeight - offsetY;
+		// draw pixels
+		for (int x = renderInitialX; x <= renderWidth; x++) {
+			for (int y = renderInitialY; y <= renderHeight; y++) {
+				int targetX = this.get3x3MatrixProductX(inverseRotationMatrix, x, y);
+				int targetY = this.get3x3MatrixProductY(inverseRotationMatrix, x, y);
+				if (targetX >= 0 && targetX < targetWidth && targetY >= 0 && targetY < targetHeight) {					
+					this.setPixel(x + offsetX, y + offsetY, color);
+				}
 			}
 		}
 	}
@@ -546,6 +607,54 @@ public class Renderer {
 				}
 			}
 		}
+	}
+
+	private double[][] getRotationMatrix(float rad, int centerX, int centerY) {
+		double[][] matrix = new double[3][3];
+		double cosRad = Math.cos(rad);
+		double sinRad = Math.sin(rad);
+		matrix[0][0] = cosRad;
+		matrix[0][1] = -sinRad;
+		matrix[0][2] = cosRad * (-centerX) + (-sinRad) * (-centerY) + centerX;
+		matrix[1][0] = sinRad;
+		matrix[1][1] = cosRad;
+		matrix[1][2] = sinRad * (-centerX) + cosRad * (-centerY) + centerY;
+		matrix[2][0] = 0;
+		matrix[2][1] = 0;
+		matrix[2][2] = 1;
+		return matrix;
+	}
+
+	private double[][] getInverse3x3Matrix(double[][] matrix) {
+		double[][] inverseMatrix = new double[3][3];
+		double minorMatrix0x0Det = matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1];
+		double minorMatrix0x1Det = matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0];
+		double minorMatrix0x2Det = matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0];
+		double minorMatrix1x0Det = matrix[0][1] * matrix[2][2] - matrix[0][2] * matrix[2][1];
+		double minorMatrix1x1Det = matrix[0][0] * matrix[2][2] - matrix[0][2] * matrix[2][0];
+		double minorMatrix1x2Det = matrix[0][0] * matrix[2][1] - matrix[0][1] * matrix[2][0];
+		double minorMatrix2x0Det = matrix[0][1] * matrix[1][2] - matrix[0][2] * matrix[1][1];
+		double minorMatrix2x1Det = matrix[0][0] * matrix[1][2] - matrix[0][2] * matrix[1][0];
+		double minorMatrix2x2Det = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+		double inverseMatrixDet = 1 / (matrix[0][0] * minorMatrix0x0Det - matrix[0][1] * minorMatrix0x1Det + matrix[0][2] * minorMatrix0x2Det);
+		inverseMatrix[0][0] = inverseMatrixDet * minorMatrix0x0Det;
+		inverseMatrix[0][1] = inverseMatrixDet * (-minorMatrix1x0Det);
+		inverseMatrix[0][2] = inverseMatrixDet * minorMatrix2x0Det;
+		inverseMatrix[1][0] = inverseMatrixDet * (-minorMatrix0x1Det);
+		inverseMatrix[1][1] = inverseMatrixDet * minorMatrix1x1Det;
+		inverseMatrix[1][2] = inverseMatrixDet * (-minorMatrix2x1Det);
+		inverseMatrix[2][0] = inverseMatrixDet * minorMatrix0x2Det;		
+		inverseMatrix[2][1] = inverseMatrixDet * (-minorMatrix1x2Det);
+		inverseMatrix[2][2] = inverseMatrixDet * minorMatrix2x2Det;
+		return inverseMatrix;
+	}
+	
+	private int get3x3MatrixProductX(double[][] matrix, int x, int y) {
+		return (int) Math.round(matrix[0][0] * x + matrix[0][1] * y + matrix[0][2]);
+	}
+
+	private int get3x3MatrixProductY(double[][] matrix, int x, int y) {
+		return (int) Math.round(matrix[1][0] * x + matrix[1][1] * y + matrix[1][2]);
 	}
 
 }

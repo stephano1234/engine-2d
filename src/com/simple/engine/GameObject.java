@@ -7,13 +7,9 @@ public abstract class GameObject {
 
 	protected String tag;
 
-	protected int positionX;
+	protected Coordinate position;
 
-	protected int positionY;
-
-	protected int offsetX;
-
-	protected int offsetY;
+	protected Vector offset = new Vector(0, 0);
 
 	protected int width;
 
@@ -26,6 +22,8 @@ public abstract class GameObject {
 	protected int paddingLeft;
 	
 	protected int paddingRight;
+	
+	protected float rotationAngle = 0f;
 
 	protected float horizontalVelocity = 0f;
 	
@@ -45,14 +43,13 @@ public abstract class GameObject {
 	
 	protected boolean disabled = false;
 	
-	protected GameObject synchronizedOffsetsGameObject;
+	protected GameObject attachedGameObject;
 	
-	protected List<Component> components = new ArrayList<>();
+	protected List<BoundingArea> boundingAreas = new ArrayList<>();
 	
 	protected GameObject(String tag, int positionX, int positionY) {
 		this.tag = tag;
-		this.positionX = positionX;
-		this.positionY = positionY;
+		this.position = new Coordinate(positionX, positionY);
 		// apply initial configurations of this game object
 		this.setConfigs();
 	}
@@ -83,38 +80,37 @@ public abstract class GameObject {
 		// implement this method to define this game object automatic moving animations
 	}
 	
-	public void updateImageAnimations(Input input) {
+	public void processImageAnimations(Input input) {
 		// implement this method to define this game object image animations
 	}
-	
-	public void updateComponents() {
+
+	public void processBoundingAreasInteractions() {
 		// reset on the floor check
 		this.isOnFloor = false;
-		// update the components
-		for (Component component : this.components) {
-			component.update();
+		// update the component
+		for (BoundingArea boundingArea : this.boundingAreas) {
+			boundingArea.move(this.offset);
+		}
+		CollisionDetector.incrementCollisionQueue(boundingAreas);
+	}
+	
+	public void synchronizeOffsetWithAttachedGameObject() {
+		if (this.attachedGameObject != null && this.isOnFloor) {
+			this.offset.plus(this.attachedGameObject.getOffset());
 		}
 	}
 	
-	public void updateSynchronizedOffsets() {
-		if (this.synchronizedOffsetsGameObject != null && this.isOnFloor) {
-			this.offsetX += this.synchronizedOffsetsGameObject.getOffsetX();
-			this.offsetY += this.synchronizedOffsetsGameObject.getOffsetY();
-		}
+	public void applyCollisionEvent(GameObject other) {
+		// implement this method if this game object has a component
 	}
-	
-	public void applyAxisAlignedBoundingBoxCollisionEvent(GameObject other) {
-		// implement this method if this game object is an axis aligned bounding box component
-	}
-	
+
 	public void clearOffsets() {
-		this.offsetX = 0;
-		this.offsetY = 0;
+		this.offset.setX(0);
+		this.offset.setY(0);
 	}
 
 	public void updatePosition() {
-		this.positionX += this.offsetX;
-		this.positionY += this.offsetY;
+		this.position.move(this.offset);
 	}
 	
 	private void calculateGravityVariables() {
@@ -123,52 +119,37 @@ public abstract class GameObject {
 		// calculate gravity
 		if (!this.isOnFloor) {
 			this.fallVelocity += this.gravityAcceleration;
-			this.offsetY += Math.round(this.fallVelocity);		
+			this.offset.plus(new Vector(0, Math.round(this.fallVelocity)));
 		}
 	}
 	
-	protected void addAxisAlignedBoundingBox() {
-		this.components.add(new AxisAlignedBoundingBox(this));
+	protected void addTriangularBoundingArea(String tag, Coordinate vertex1, Coordinate vertex2, Coordinate vertex3) {
+		this.boundingAreas.add(new TriangularBoundingArea(tag, this, vertex1, vertex2, vertex3));
 	}
-	
-	protected void collideWithoutBouncing(GameObject other) {
-		int minimumDistanceX = 0;
-		int minimumDistanceY = 0;
-		if (this.positionY <= other.getPositionY()) {
-			minimumDistanceY = other.getPositionY() + other.getOffsetY() + other.getPaddingTop() - (this.positionY + this.offsetY + this.height - this.paddingBottom);
-		} else {
-			minimumDistanceY = other.getPositionY() + other.getOffsetY() - other.getPaddingBottom() + other.getHeight() - (this.positionY + this.offsetY + this.paddingTop);
-		}
-		if (this.positionX <= other.getPositionX()) {
-			minimumDistanceX = other.getPositionX() + other.getOffsetX() + other.getPaddingLeft() - (this.positionX + this.offsetX + this.width - this.paddingRight);			
-		} else {
-			minimumDistanceX = other.getPositionX() + other.getOffsetX() - other.getPaddingRight() + other.getWidth() - (this.positionX + this.offsetX + this.paddingLeft);			
-		}
-		if (Math.abs(minimumDistanceX) < Math.abs(minimumDistanceY)) {
-			this.offsetX += minimumDistanceX;
-		} else {
-			if (this.positionY <= other.getPositionY()) {
-				this.synchronizedOffsetsGameObject = other;
-				this.isOnFloor = this.fallVelocity >= 0;
-				this.fallVelocity = this.fallVelocity > 0 ? 0 : this.fallVelocity;
-			} else {
-				this.fallVelocity = this.fallVelocity < 0 ? 0 : this.fallVelocity;
-			}
-			this.offsetY += minimumDistanceY;
-		}
+
+	protected void addRectangleBoundingArea(String tag, Coordinate vertex1, Coordinate vertex2, Coordinate vertex3, Coordinate vertex4) {
+		this.boundingAreas.add(new RectangleBoundingArea(tag, this, vertex1, vertex2, vertex3, vertex4));
 	}
-	
+
 	protected void jump() {
 		this.fallVelocity = Math.round(this.jumpInitialVelocity);
-		this.offsetY = Math.round(this.jumpInitialVelocity);
+		this.offset.plus(new Vector(0, Math.round(this.jumpInitialVelocity)));
 	}
 
 	protected void moveRight() {
-		this.offsetX += Math.round(this.horizontalVelocity);
+		this.offset.plus(new Vector(Math.round(this.horizontalVelocity), 0));
 	}
 
 	protected void moveLeft() {
-		this.offsetX -= Math.round(this.horizontalVelocity);
+		this.offset.plus(new Vector(-Math.round(this.horizontalVelocity), 0));
+	}
+
+	protected void moveDown() {
+		this.offset.plus(new Vector(0, Math.round(this.verticalVelocity)));
+	}
+
+	protected void moveUp() {
+		this.offset.plus(new Vector(0, -Math.round(this.verticalVelocity)));
 	}
 
 	// conventional getters and setters
@@ -197,36 +178,20 @@ public abstract class GameObject {
 		this.height = height;
 	}	
 	
-	public int getPositionX() {
-		return positionX;
+	public Coordinate getPosition() {
+		return this.position;
 	}
 
-	public void setPositionX(int positionX) {
-		this.positionX = positionX;
+	public void setPosition(Coordinate position) {
+		this.position = position;
 	}
 
-	public int getPositionY() {
-		return positionY;
+	public Vector getOffset() {
+		return this.offset;
 	}
 
-	public void setPositionY(int positionY) {
-		this.positionY = positionY;
-	}
-
-	public int getOffsetX() {
-		return offsetX;
-	}
-
-	public void setOffsetX(int offsetX) {
-		this.offsetX = offsetX;
-	}
-
-	public int getOffsetY() {
-		return offsetY;
-	}
-
-	public void setOffsetY(int offsetY) {
-		this.offsetY = offsetY;
+	public void setOffset(Vector offset) {
+		this.offset = offset;
 	}
 
 	public int getPaddingTop() {

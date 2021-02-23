@@ -11,7 +11,7 @@ public abstract class GameRunner {
 	
 	private Camera camera;
 
-	private boolean isChangePhaseLogicalStep = true;
+	private boolean isChangePhaseUpdateStep = true;
 	
 	private String currentPhaseTag;
 	
@@ -28,7 +28,7 @@ public abstract class GameRunner {
 
 	protected abstract void setWindowConfig(Engine engine);	
 	
-	protected abstract void defineLogicalStep(Engine engine);
+	protected abstract void defineGeneralEvents(Input input);
 	
 	protected abstract void defineFrame(Renderer renderer);
 	
@@ -36,27 +36,17 @@ public abstract class GameRunner {
 		this.engine.start();
 	}
 	
-	public void loopLogicalStep(Engine engine) {
+	public void processGameEvents(Input input) {
 				
 		this.loadPhaseStep();
 		
-		this.defineLogicalStep(engine);
+		this.defineGeneralEvents(input);
 		
-		this.clearGameObjectsOffsets();
-		
-		this.updateGameObjectsOffsets(engine.getInput());
-		
-		this.updateGameObjectsSynchronizedOffsets();
-		
-		this.updateGameObjectsComponents();
-
-		this.updateGameObjectsImagesAnimations(engine.getInput());
-
-		this.updateGameObjectsPosition();
+		this.processGameObjects(input);
 		
 	}
 	
-	public void renderFrame(Renderer renderer) {
+	public void renderGameFrame(Renderer renderer) {
 
 		this.updateCameraPosition(renderer);
 		
@@ -68,6 +58,15 @@ public abstract class GameRunner {
 	
 	}
 
+	private void processGameObjects(Input input) {
+		this.clearGameObjectsOffsets();
+		this.updateGameObjectsOffsets(input);
+		this.synchronizeAttachedGameObjectsOffsets();
+		this.processGameObjectsBoundingAreasInteractions();
+		this.processGameObjectsImagesAnimations(input);
+		this.updateGameObjectsPosition();
+	}
+	
 	private void renderGameObjects(Renderer renderer) {
 		for (GameObject gameObject : this.gameObjects) {
 			gameObject.renderObject(renderer);
@@ -92,22 +91,22 @@ public abstract class GameRunner {
 		}
 	}
 
-	private void updateGameObjectsComponents() {
+	private void processGameObjectsBoundingAreasInteractions() {
 		for (GameObject gameObject : this.gameObjects) {
-			gameObject.updateComponents();
+			gameObject.processBoundingAreasInteractions();
 		}
-		GamePhysic.updateAxisAlignedBoundingBox();
+		CollisionDetector.resolveCollisions();
 	}
 
-	private void updateGameObjectsImagesAnimations(Input input) {
+	private void processGameObjectsImagesAnimations(Input input) {
 		for (GameObject gameObject : this.gameObjects) {
-			gameObject.updateImageAnimations(input);
+			gameObject.processImageAnimations(input);
 		}
 	}
 
-	private void updateGameObjectsSynchronizedOffsets() {
+	private void synchronizeAttachedGameObjectsOffsets() {
 		for (GameObject gameObject : this.gameObjects) {
-			gameObject.updateSynchronizedOffsets();
+			gameObject.synchronizeOffsetWithAttachedGameObject();
 		}
 	}
 	
@@ -122,8 +121,8 @@ public abstract class GameRunner {
 	}
 	
 	private void loadPhaseStep() {
-		if (this.isChangePhaseLogicalStep) {
-			this.isChangePhaseLogicalStep = false;
+		if (this.isChangePhaseUpdateStep) {
+			this.isChangePhaseUpdateStep = false;
 			this.currentPhase = this.getPhaseByTag(this.currentPhaseTag);
 		}
 	}
@@ -171,7 +170,7 @@ public abstract class GameRunner {
 	}
 
 	public void setCurrentPhaseTag(String currentPhaseTag) {
-		this.isChangePhaseLogicalStep = true;
+		this.isChangePhaseUpdateStep = true;
 		this.currentPhaseTag = currentPhaseTag;
 	}
 

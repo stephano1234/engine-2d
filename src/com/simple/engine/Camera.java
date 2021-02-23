@@ -25,8 +25,8 @@ public class Camera {
 	
 	public void updateOffsets() {
 		if (this.target != null) {
-			this.offsetX = this.target.getPositionX() + this.target.getWidth() / 2;
-			this.offsetY = this.target.getPositionY() + this.target.getHeight() / 2;
+			this.offsetX = this.target.getPosition().getX() + this.target.getWidth() / 2;
+			this.offsetY = this.target.getPosition().getY() + this.target.getHeight() / 2;
 		}
 	}
 	

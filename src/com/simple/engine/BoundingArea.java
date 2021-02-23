@@ -1,18 +1,18 @@
 package com.simple.engine;
 
-public abstract class Component {
+public abstract class BoundingArea {
 
 	protected String tag;
 	
 	protected GameObject gameObject;
 	
-	protected Component(String tag, GameObject gameObject) {
+	protected BoundingArea(String tag, GameObject gameObject) {
 		this.tag = tag;
 		this.gameObject = gameObject;
 	}
 	
-	public abstract void update();
-
+	public abstract void move(Vector offset);
+	
 	public String getTag() {
 		return tag;
 	}

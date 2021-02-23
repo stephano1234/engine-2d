@@ -40,12 +40,11 @@ public class Player extends GameObject {
 		this.paddingTop = 4;
 		this.paddingLeft = 6;
 		this.paddingRight = 5;
-		this.addAxisAlignedBoundingBox();
 	}
 
 	@Override
-	public void applyAxisAlignedBoundingBoxCollisionEvent(GameObject other) {
-		this.collideWithoutBouncing(other);
+	public void applyCollisionEvent(GameObject other) {
+
 	}
 	
 	@Override
@@ -66,7 +65,7 @@ public class Player extends GameObject {
 	}
 
 	@Override
-	public void updateImageAnimations(Input input) {
+	public void processImageAnimations(Input input) {
 		
 		// walking and jump animation
 		if (!input.isKey(KeyEvent.VK_LEFT) && !input.isKey(KeyEvent.VK_RIGHT)) {
@@ -106,7 +105,7 @@ public class Player extends GameObject {
 	
 	@Override
 	public void renderObject(Renderer renderer) {
-		renderer.drawImageTile(this.image, this.positionX, this.positionY, this.imgTileX, this.imgTileY);
+		renderer.drawImageTile(this.image, this.position.getX(), this.position.getY(), this.imgTileX, this.imgTileY);
 	}
 
 }

@@ -71,7 +71,7 @@ public class Engine implements Runnable {
 				render = true;
 				
 				// update the game logical state
-				this.gameRunner.loopLogicalStep(this);
+				this.gameRunner.processGameEvents(this.input);
 				
 				// feed last game controls state
 				this.input.update();
@@ -91,7 +91,7 @@ public class Engine implements Runnable {
 				this.renderer.clear();
 	
 				// draw elements on the frame and define its pixels lightness and darkness
-				this.gameRunner.renderFrame(this.renderer);
+				this.gameRunner.renderGameFrame(this.renderer);
 
 				// process lightness and darkness of the pixels
 				this.renderer.enlight();

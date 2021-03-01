@@ -249,7 +249,25 @@ public class BoundingAreasInteractionsResolver {
 		}
 		// circle X circle
 		if (!(boundingArea1 instanceof ConvexPolygon) && !(boundingArea2 instanceof ConvexPolygon)) {
-			
+			Vector minimumDistanceVector = null;
+			double minimumDistanceValue = Integer.MAX_VALUE;
+			CircleBoundingArea circleBoundingArea1 = (CircleBoundingArea) boundingArea1;
+			Coordinate circleCenter1 = circleBoundingArea1.getCenter();
+			int circleRadius1 = circleBoundingArea1.getRadius();
+			CircleBoundingArea circleBoundingArea2 = (CircleBoundingArea) boundingArea2;
+			Coordinate circleCenter2 = circleBoundingArea2.getCenter();
+			int circleRadius2 = circleBoundingArea2.getRadius();
+			minimumDistanceVector = new Vector(circleCenter1, circleCenter2); 
+			double distanceBetweenCenters = minimumDistanceVector.getNorm();
+			minimumDistanceValue = circleRadius1 + circleRadius2 - distanceBetweenCenters;
+			if (minimumDistanceValue < 0) {
+				return;
+			}
+			minimumDistanceVector.multiplyByScalar(minimumDistanceValue / distanceBetweenCenters);
+			boundingArea2.move(minimumDistanceVector);
+			boundingArea2.getGameObject().getOffset().plus(minimumDistanceVector);
+			boundingArea1.getGameObject().applyCollisionInteractionEvent(boundingArea2);
+			boundingArea2.getGameObject().applyCollisionInteractionEvent(boundingArea1);
 		}
 	}
 	

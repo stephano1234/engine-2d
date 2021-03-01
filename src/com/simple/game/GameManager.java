@@ -188,7 +188,7 @@ public class GameManager extends GameRunner {
 
 //		this.addGameObject(new Player(50, 10));
 
-		this.addGameObject(new TestTriangle(100, 100));
+		this.addGameObject(new TestObj(100, 100));
 		
 		Scenery scenery = new Scenery("fase teste");
 		

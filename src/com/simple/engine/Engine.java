@@ -47,27 +47,27 @@ public class Engine implements Runnable {
 		
 		boolean render;
 		
-		double firstTime = 0;
+		double thisTime;
 		double lastTime = System.nanoTime() / 1000000000.0;
-		double passedTime = 0;
+		double passedTime;
 		double unprocessedTime = 0;
 		
 		while (this.running) {
 			
-			render = false;
+			render = true;
 			
-			firstTime = System.nanoTime() / 1000000000.0;
-			passedTime = firstTime - lastTime;
-			lastTime = firstTime;
+			thisTime = System.nanoTime() / 1000000000.0;
+			passedTime = thisTime - lastTime;
 			unprocessedTime += passedTime;
+			lastTime = thisTime;
 			
 			// calculate FPS
 			frameTime += passedTime;
 			
 			while (unprocessedTime >= UPDATE_CAP) {
 				
-				unprocessedTime -= UPDATE_CAP;
-				
+				unprocessedTime -= UPDATE_CAP;				
+
 				render = true;
 				
 				// update the game logical state
@@ -75,16 +75,16 @@ public class Engine implements Runnable {
 				
 				// feed last game controls state
 				this.input.update();
-				
+
 				// calculate FPS
 				if (frameTime >= 1.0) {
 					frameTime = 0;
 					fps = frames;
 					frames = 0;
 				}
-				
+					
 			}
-			
+						
 			if (render) {
 				
 				// clear frame for render the new image

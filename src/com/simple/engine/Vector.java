@@ -13,6 +13,11 @@ public class Vector {
 		this.y = y;
 	}
 
+	public Vector(Coordinate firstPoint, Coordinate lastPoint) {
+		this.x = lastPoint.getX() - firstPoint.getX();
+		this.y = lastPoint.getY() - firstPoint.getY();
+	}
+
 	public void multiplyByScalar(double scalar) {
 		this.x = (int) Math.round(this.x * scalar);
 		this.y = (int) Math.round(this.y * scalar);
@@ -30,6 +35,10 @@ public class Vector {
 		});
 	}
 
+	public double getNorm() {
+		return Math.sqrt((double) (this.x * this.x + this.y * this.y));
+	}
+	
 	public int getX() {
 		return x;
 	}

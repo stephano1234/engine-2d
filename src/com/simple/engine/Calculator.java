@@ -69,10 +69,6 @@ public class Calculator {
 	public static int get2x2MatrixProductY(int[][] matrix, int x, int y) {
 		return matrix[1][0] * x + matrix[1][1] * y;
 	}
-
-	public static Vector getVector(Coordinate firstPoint, Coordinate lastPoint) {
-		return new Vector(lastPoint.getX() - firstPoint.getX(), lastPoint.getY() - firstPoint.getY());
-	}
 	
 	public static Vector getPerpendicularVector(Vector vector) {
 		return new Vector(vector.getY(), -vector.getX());
@@ -82,12 +78,8 @@ public class Calculator {
 		return vector1.getX() * vector2.getX() + vector1.getY() * vector2.getY();
 	}
 	
-	public static double getNorm(Vector vector) {
-		return Math.sqrt((double) dotProduct(vector, vector));
-	}
-	
 	public static Vector getUnitaryVector(Vector vector) {
-		double norm = getNorm(vector);
+		double norm = vector.getNorm();
 		return new Vector((int) Math.round(vector.getX() / norm), (int) Math.round(vector.getY() / norm));
 	}
 	

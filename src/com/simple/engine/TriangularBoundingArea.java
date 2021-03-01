@@ -37,9 +37,9 @@ public class TriangularBoundingArea extends BoundingArea implements ConvexPolygo
 		this.vertex1 = vertex1;
 		this.vertex2 = vertex2;
 		this.vertex3 = vertex3;
-		this.vector1 = Calculator.getVector(this.vertex1, this.vertex2);
-		this.vector2 = Calculator.getVector(this.vertex2, this.vertex3);
-		this.vector3 = Calculator.getVector(this.vertex3, this.vertex1);
+		this.vector1 = new Vector(this.vertex1, this.vertex2);
+		this.vector2 = new Vector(this.vertex2, this.vertex3);
+		this.vector3 = new Vector(this.vertex3, this.vertex1);
 	}
 	
 	public Coordinate getVertex1() {

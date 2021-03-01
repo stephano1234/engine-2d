@@ -14,43 +14,58 @@ public abstract class GameObject {
 	protected int width;
 
 	protected int height;
+
+	protected int halfWidth;
+
+	protected int halfHeight;
+
+	protected Image staticImage;
 	
-	protected int paddingTop;
+	protected ImageTile animatedImage;
 	
-	protected int paddingBottom;
-	
-	protected int paddingLeft;
-	
-	protected int paddingRight;
-	
+	protected int tileX = 0;
+
+	protected int tileY = 0;
+
 	protected float rotationAngle = 0f;
-
-	protected float horizontalVelocity = 0f;
-	
-	protected float verticalVelocity = 0f;
-	
-	protected float gravityAcceleration = 0f;
-
-	protected float jumpInitialVelocity = 0f;
-
-	protected float fallVelocity = 0f;
-	
-	protected boolean isOnFloor = false;
-	
-	protected boolean wasOnFloor = false;
-
-	protected boolean isUnderGravityEffect = false;
-	
-	protected boolean disabled = false;
 	
 	protected GameObject attachedGameObject;
-	
+		
 	protected List<BoundingArea> boundingAreas = new ArrayList<>();
 	
-	protected GameObject(String tag, int positionX, int positionY) {
+	protected int priorityCollisionOrder = 0;
+	
+	protected List<String> ignoredCollisionInteractionGameObjectsTags = new ArrayList<>();
+	
+	protected GameObject(String tag, int width, int height, int positionX, int positionY) {
 		this.tag = tag;
+		this.width = width;
+		this.height = height;
+		this.halfWidth = this.width / 2;
+		this.halfHeight = this.height / 2;
 		this.position = new Coordinate(positionX, positionY);
-		// apply initial configurations of this game object
+		this.setConfigs();
+	}
+
+	protected GameObject(String tag, String staticImagePath, int positionX, int positionY) {
+		this.tag = tag;
+		this.staticImage = new Image(staticImagePath);
+		this.width = this.staticImage.getWidth();
+		this.height = this.staticImage.getHeight();
+		this.halfWidth = this.width / 2;
+		this.halfHeight = this.height / 2;
+		this.position = new Coordinate(positionX, positionY);
+		this.setConfigs();
+	}
+
+	protected GameObject(String tag, int width, int height, String animatedImagePath, int positionX, int positionY) {
+		this.tag = tag;
+		this.width = width;
+		this.height = height;
+		this.halfWidth = this.width / 2;
+		this.halfHeight = this.height / 2;
+		this.animatedImage = new ImageTile(animatedImagePath, width, height);
+		this.position = new Coordinate(positionX, positionY);
 		this.setConfigs();
 	}
 
@@ -58,25 +73,18 @@ public abstract class GameObject {
 		// implement this method to set the initial configurations of this game object
 	}
 	
-	public void updateOffsets(Input input) {
-		
-		if (this.isUnderGravityEffect) {
-			this.calculateGravityVariables();
-		}
-		
-		this.updateControlBasedOffsetsChanges(input);
-		
-		this.updateAutomaticOffsetsChanges();
-		
+	/* game object event functions */
+	
+	public void processOffsetsChanges(Input input) {
+		this.processAutomaticOffsetsChanges();
+		this.processControlBasedOffsetsChanges(input);
 	}
 
-	public abstract void renderObject(Renderer renderer);
-
-	public void updateControlBasedOffsetsChanges(Input input) {
+	public void processControlBasedOffsetsChanges(Input input) {
 		// implement this method if this game object is controlled by the player
 	}
 
-	public void updateAutomaticOffsetsChanges() {
+	public void processAutomaticOffsetsChanges() {
 		// implement this method to define this game object automatic moving animations
 	}
 	
@@ -84,23 +92,24 @@ public abstract class GameObject {
 		// implement this method to define this game object image animations
 	}
 
+	public void addIgnoredCollisionInteractionGameObjectTag(String gameObjectTag) {
+		this.ignoredCollisionInteractionGameObjectsTags.add(gameObjectTag);
+	}
+	
 	public void processBoundingAreasInteractions() {
-		// reset on the floor check
-		this.isOnFloor = false;
-		// update the component
 		for (BoundingArea boundingArea : this.boundingAreas) {
 			boundingArea.move(this.offset);
 		}
-		CollisionDetector.incrementCollisionQueue(boundingAreas);
+		BoundingAreasInteractionsResolver.incrementCollisionQueue(this.boundingAreas, this.priorityCollisionOrder);
 	}
 	
 	public void synchronizeOffsetWithAttachedGameObject() {
-		if (this.attachedGameObject != null && this.isOnFloor) {
+		if (this.attachedGameObject != null) {
 			this.offset.plus(this.attachedGameObject.getOffset());
 		}
 	}
 	
-	public void applyCollisionEvent(GameObject other) {
+	public void applyCollisionInteractionEvent(BoundingArea boudingArea) {
 		// implement this method if this game object has a component
 	}
 
@@ -113,16 +122,6 @@ public abstract class GameObject {
 		this.position.move(this.offset);
 	}
 	
-	private void calculateGravityVariables() {
-		// check if it's actually on the floor in the last update
-		this.wasOnFloor = this.isOnFloor;
-		// calculate gravity
-		if (!this.isOnFloor) {
-			this.fallVelocity += this.gravityAcceleration;
-			this.offset.plus(new Vector(0, Math.round(this.fallVelocity)));
-		}
-	}
-	
 	protected void addTriangularBoundingArea(String tag, Coordinate vertex1, Coordinate vertex2, Coordinate vertex3) {
 		this.boundingAreas.add(new TriangularBoundingArea(tag, this, vertex1, vertex2, vertex3));
 	}
@@ -131,53 +130,56 @@ public abstract class GameObject {
 		this.boundingAreas.add(new RectangleBoundingArea(tag, this, vertex1, vertex2, vertex3, vertex4));
 	}
 
-	protected void jump() {
-		this.fallVelocity = Math.round(this.jumpInitialVelocity);
-		this.offset.plus(new Vector(0, Math.round(this.jumpInitialVelocity)));
+	protected void moveRight(float horizontalVelocity) {
+		this.offset.plus(new Vector(Math.round(horizontalVelocity), 0));
 	}
 
-	protected void moveRight() {
-		this.offset.plus(new Vector(Math.round(this.horizontalVelocity), 0));
+	protected void moveLeft(float horizontalVelocity) {
+		this.offset.plus(new Vector(-Math.round(horizontalVelocity), 0));
 	}
 
-	protected void moveLeft() {
-		this.offset.plus(new Vector(-Math.round(this.horizontalVelocity), 0));
+	protected void moveDown(float verticalVelocity) {
+		this.offset.plus(new Vector(0, Math.round(verticalVelocity)));
 	}
 
-	protected void moveDown() {
-		this.offset.plus(new Vector(0, Math.round(this.verticalVelocity)));
+	protected void moveUp(float verticalVelocity) {
+		this.offset.plus(new Vector(0, -Math.round(verticalVelocity)));
 	}
 
-	protected void moveUp() {
-		this.offset.plus(new Vector(0, -Math.round(this.verticalVelocity)));
+	/* render functions */
+	
+	public abstract void renderObject(Renderer renderer);
+	
+	public void renderAnimatedImage(Renderer renderer, boolean blockLight) {
+		renderer.drawImageTile(this.animatedImage, this.position.getX() - this.halfWidth, this.position.getY() - this.halfHeight, this.tileX, this.tileY, blockLight);
 	}
 
-	// conventional getters and setters
+	public void renderStaticImage(Renderer renderer, boolean blockLight) {
+		renderer.drawImage(this.staticImage, this.position.getX() - this.halfWidth, this.position.getY() - this.halfHeight, blockLight);
+	}
+
+	public void renderRectArea(Renderer renderer, int color, boolean blockLight) {
+		renderer.drawRectArea(this.width, this.height, color, this.position.getX() - this.halfWidth, this.position.getY() - this.halfHeight, blockLight);
+	}
+	
+	/* conventional getters and setters */
 	
 	public String getTag() {
-		return tag;
-	}
-
-	public void setTag(String tag) {
-		this.tag = tag;
+		return this.tag;
 	}
 
 	public int getWidth() {
-		return width;
-	}
-
-	public void setWidth(int width) {
-		this.width = width;
+		return this.width;
 	}
 
 	public int getHeight() {
-		return height;
+		return this.height;
+	}
+	
+	public List<String> getIgnoredCollisionInteractionGameObjectsTags() {
+		return this.ignoredCollisionInteractionGameObjectsTags;
 	}
 
-	public void setHeight(int height) {
-		this.height = height;
-	}	
-	
 	public Coordinate getPosition() {
 		return this.position;
 	}
@@ -193,45 +195,5 @@ public abstract class GameObject {
 	public void setOffset(Vector offset) {
 		this.offset = offset;
 	}
-
-	public int getPaddingTop() {
-		return paddingTop;
-	}
-
-	public void setPaddingTop(int paddingTop) {
-		this.paddingTop = paddingTop;
-	}
-
-	public int getPaddingBottom() {
-		return paddingBottom;
-	}
-
-	public void setPaddingBottom(int paddingBottom) {
-		this.paddingBottom = paddingBottom;
-	}
-
-	public int getPaddingLeft() {
-		return paddingLeft;
-	}
-
-	public void setPaddingLeft(int paddingLeft) {
-		this.paddingLeft = paddingLeft;
-	}
-
-	public int getPaddingRight() {
-		return paddingRight;
-	}
-
-	public void setPaddingRight(int paddingRight) {
-		this.paddingRight = paddingRight;
-	}
-
-	public boolean isDisabled() {
-		return disabled;
-	}
-
-	public void setDisabled(boolean disabled) {
-		this.disabled = disabled;
-	}	
 
 }

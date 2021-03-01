@@ -9,15 +9,15 @@ public abstract class GameRunner {
 	
 	private Engine engine;
 	
-	private Camera camera;
+	private Camera camera = new Camera(0, 0);
 
-	private boolean isChangePhaseUpdateStep = true;
+	private boolean isChangeSceneryUpdateStep = true;
 	
-	private String currentPhaseTag;
+	private String currentSceneryTag;
 	
-	private Phase currentPhase;
+	private Scenery currentScenery;
 
-	private List<Phase> phases = new ArrayList<>();
+	private List<Scenery> sceneries = new ArrayList<>();
 	
 	private List<GameObject> gameObjects = new ArrayList<>();	
 	
@@ -38,7 +38,7 @@ public abstract class GameRunner {
 	
 	public void processGameEvents(Input input) {
 				
-		this.loadPhaseStep();
+		this.loadSceneryStep();
 		
 		this.defineGeneralEvents(input);
 		
@@ -48,11 +48,11 @@ public abstract class GameRunner {
 	
 	public void renderGameFrame(Renderer renderer) {
 
-		this.updateCameraPosition(renderer);
+		renderer.setCameraPosition();
 		
 		this.defineFrame(renderer);
 
-		this.renderPhase(renderer);
+		this.renderScenery(renderer);
 		
 		this.renderGameObjects(renderer);
 	
@@ -60,7 +60,7 @@ public abstract class GameRunner {
 
 	private void processGameObjects(Input input) {
 		this.clearGameObjectsOffsets();
-		this.updateGameObjectsOffsets(input);
+		this.processGameObjectsOffsetsChanges(input);
 		this.synchronizeAttachedGameObjectsOffsets();
 		this.processGameObjectsBoundingAreasInteractions();
 		this.processGameObjectsImagesAnimations(input);
@@ -79,15 +79,9 @@ public abstract class GameRunner {
 		}
 	}
 	
-	private void updateGameObjectsOffsets(Input input) {
-		int i = 0;
-		while (i < this.gameObjects.size()) {			
-			if (this.gameObjects.get(i).isDisabled()) {
-				this.gameObjects.remove(i);
-			} else {
-				this.gameObjects.get(i).updateOffsets(input);
-				i++;
-			}
+	private void processGameObjectsOffsetsChanges(Input input) {
+		for (GameObject gameObject : this.gameObjects) {
+			gameObject.processOffsetsChanges(input);
 		}
 	}
 
@@ -95,7 +89,7 @@ public abstract class GameRunner {
 		for (GameObject gameObject : this.gameObjects) {
 			gameObject.processBoundingAreasInteractions();
 		}
-		CollisionDetector.resolveCollisions();
+		BoundingAreasInteractionsResolver.resolveCollisionInteractions();
 	}
 
 	private void processGameObjectsImagesAnimations(Input input) {
@@ -116,14 +110,16 @@ public abstract class GameRunner {
 		}
 	}
 
-	private void renderPhase(Renderer renderer) {
-		this.currentPhase.render(renderer);
+	private void renderScenery(Renderer renderer) {
+		if (this.currentScenery != null) {			
+			this.currentScenery.render(renderer);
+		}
 	}
 	
-	private void loadPhaseStep() {
-		if (this.isChangePhaseUpdateStep) {
-			this.isChangePhaseUpdateStep = false;
-			this.currentPhase = this.getPhaseByTag(this.currentPhaseTag);
+	private void loadSceneryStep() {
+		if (this.isChangeSceneryUpdateStep) {
+			this.isChangeSceneryUpdateStep = false;
+			this.currentScenery = this.getSceneryByTag(this.currentSceneryTag);
 		}
 	}
 	
@@ -132,28 +128,24 @@ public abstract class GameRunner {
 	}
 
 	public void setGameObjectFixedCamera(String tag) {
-		this.camera = new Camera(tag, this);
-	}
-
-	private void updateCameraPosition(Renderer renderer) {
-		renderer.setCameraPosition(this.getCamera());
+		this.camera.setTarget(this.getGameObjectByTag(tag));
 	}
 	
-	public void addPhase(Phase phase) {
-		this.phases.add(phase);
+	public void addScenery(Scenery scenery) {
+		this.sceneries.add(scenery);
 	}
 
-	public Phase getPhaseByTag(String tag) {
-		for (Phase phase : this.phases) {
-			if (phase.getTag().equals(tag)) {
-				return phase;
+	public Scenery getSceneryByTag(String tag) {
+		for (Scenery scenery : this.sceneries) {
+			if (scenery.getTag().equals(tag)) {
+				return scenery;
 			}
 		}
 		return null;
 	}
 
-	public Phase getCurrentPhase() {
-		return this.currentPhase;
+	public Scenery getCurrentScenery() {
+		return this.currentScenery;
 	}
 	
 	public void addGameObject(GameObject gameObject) {
@@ -169,13 +161,13 @@ public abstract class GameRunner {
 		return null;
 	}
 
-	public void setCurrentPhaseTag(String currentPhaseTag) {
-		this.isChangePhaseUpdateStep = true;
-		this.currentPhaseTag = currentPhaseTag;
+	public void setCurrentSceneryTag(String currentPhaseTag) {
+		this.isChangeSceneryUpdateStep = true;
+		this.currentSceneryTag = currentPhaseTag;
 	}
 
-	public String getCurrentPhaseTag() {
-		return currentPhaseTag;
+	public String getCurrentSceneryTag() {
+		return currentSceneryTag;
 	}
 
 }

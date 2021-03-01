@@ -43,10 +43,10 @@ public class RectangleBoundingArea extends BoundingArea implements ConvexPolygon
 		this.vertex2 = vertex2;
 		this.vertex3 = vertex3;
 		this.vertex4 = vertex4;
-		this.vector1 = Calculator.getVector(this.vertex1, this.vertex2);
-		this.vector2 = Calculator.getVector(this.vertex2, this.vertex3);
-		this.vector3 = Calculator.getVector(this.vertex3, this.vertex4);
-		this.vector4 = Calculator.getVector(this.vertex4, this.vertex1);
+		this.vector1 = new Vector(this.vertex1, this.vertex2);
+		this.vector2 = new Vector(this.vertex2, this.vertex3);
+		this.vector3 = new Vector(this.vertex3, this.vertex4);
+		this.vector4 = new Vector(this.vertex4, this.vertex1);
 	}
 	
 	public Coordinate getVertex1() {

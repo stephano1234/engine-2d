@@ -3,7 +3,7 @@ package com.simple.engine;
 import java.util.Arrays;
 import java.util.List;
 
-public class TriangularBoundingArea extends BoundingArea implements ConvexPolygon {
+public class TriangleBoundingArea extends BoundingArea implements ConvexPolygon {
 
 	private Coordinate vertex1;
 	
@@ -17,7 +17,7 @@ public class TriangularBoundingArea extends BoundingArea implements ConvexPolygo
 	
 	private Vector vector3;
 	
-	public TriangularBoundingArea(String tag, GameObject gameObject, Coordinate vertex1, Coordinate vertex2, Coordinate vertex3) {
+	public TriangleBoundingArea(String tag, GameObject gameObject, Coordinate vertex1, Coordinate vertex2, Coordinate vertex3) {
 		super(tag, gameObject);
 		this.changeVertices(vertex1, vertex2, vertex3);
 	}
@@ -32,7 +32,21 @@ public class TriangularBoundingArea extends BoundingArea implements ConvexPolygo
 			)
 		;
 	}
-	
+
+	@Override
+	public TriangleBoundingArea spin(float angle) {
+		double[][] spinMatrix = Calculator.getRotationMatrix(angle, this.getCenter());
+		TriangleBoundingArea rotatedBoundingArea = new TriangleBoundingArea(this.tag + "#spinCopy", this.gameObject, this.vertex1, this.vertex2, this.vertex3);
+		rotatedBoundingArea.changeVertices
+			(
+				Calculator.get3x3MatrixProduct(spinMatrix, this.vertex1), 
+				Calculator.get3x3MatrixProduct(spinMatrix, this.vertex2), 
+				Calculator.get3x3MatrixProduct(spinMatrix, this.vertex3)
+			)
+		;
+		return rotatedBoundingArea;
+	}
+
 	public void changeVertices(Coordinate vertex1, Coordinate vertex2, Coordinate vertex3) {
 		this.vertex1 = vertex1;
 		this.vertex2 = vertex2;
@@ -74,6 +88,16 @@ public class TriangularBoundingArea extends BoundingArea implements ConvexPolygo
 	@Override
 	public List<Vector> getVectors() {
 		return Arrays.asList(this.vector1, this.vector2, this.vector3);
+	}
+
+	@Override
+	public Coordinate getCenter() {
+		return new Coordinate
+			(
+				(int) Math.round(((double) (this.vertex1.getX() + this.vertex2.getX() + this.vertex3.getX())) / 3),
+				(int) Math.round(((double) (this.vertex1.getY() + this.vertex2.getY() + this.vertex3.getY())) / 3)
+			)
+		;
 	}
 
 }

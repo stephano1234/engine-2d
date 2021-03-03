@@ -8,4 +8,6 @@ public interface ConvexPolygon {
 	
 	public List<Vector> getVectors();
 	
+	public Coordinate getCenter();
+	
 }

@@ -27,15 +27,30 @@ public class RectangleBoundingArea extends BoundingArea implements ConvexPolygon
 	}
 
 	@Override
-	public void move(Vector offset) {
+	public void move(Vector linearOffset) {
 		this.changeVertices
 			(
-				new Coordinate(this.getVertex1().getX() + offset.getX(), this.getVertex1().getY() + offset.getY()), 
-				new Coordinate(this.getVertex2().getX() + offset.getX(), this.getVertex2().getY() + offset.getY()), 
-				new Coordinate(this.getVertex3().getX() + offset.getX(), this.getVertex3().getY() + offset.getY()),
-				new Coordinate(this.getVertex4().getX() + offset.getX(), this.getVertex4().getY() + offset.getY())
+				new Coordinate(this.getVertex1().getX() + linearOffset.getX(), this.getVertex1().getY() + linearOffset.getY()), 
+				new Coordinate(this.getVertex2().getX() + linearOffset.getX(), this.getVertex2().getY() + linearOffset.getY()), 
+				new Coordinate(this.getVertex3().getX() + linearOffset.getX(), this.getVertex3().getY() + linearOffset.getY()),
+				new Coordinate(this.getVertex4().getX() + linearOffset.getX(), this.getVertex4().getY() + linearOffset.getY())
 			)
 		;
+	}
+
+	@Override
+	public RectangleBoundingArea spin(float angularOffset) {
+		double[][] spinMatrix = Calculator.getRotationMatrix(angularOffset, this.getCenter());
+		RectangleBoundingArea rotatedBoundingArea = new RectangleBoundingArea(this.tag + "#spinCopy", this.gameObject, this.vertex1, this.vertex2, this.vertex3, this.vertex4);
+		rotatedBoundingArea.changeVertices
+			(
+				Calculator.get3x3MatrixProduct(spinMatrix, this.vertex1), 
+				Calculator.get3x3MatrixProduct(spinMatrix, this.vertex2), 
+				Calculator.get3x3MatrixProduct(spinMatrix, this.vertex3),
+				Calculator.get3x3MatrixProduct(spinMatrix, this.vertex4)
+			)
+		;
+		return rotatedBoundingArea;
 	}
 
 	public void changeVertices(Coordinate vertex1, Coordinate vertex2, Coordinate vertex3, Coordinate vertex4) {
@@ -89,6 +104,26 @@ public class RectangleBoundingArea extends BoundingArea implements ConvexPolygon
 	@Override
 	public List<Vector> getVectors() {
 		return Arrays.asList(this.vector1, this.vector2, this.vector3, this.vector4);
+	}
+
+	@Override
+	public Coordinate getCenter() {
+		Coordinate halfSidePoint1 = new Coordinate
+			(
+				(int) Math.round(((double) (this.vertex1.getX() + this.vertex2.getX())) / 2),
+				this.vertex1.getY()
+			)
+		;
+		Coordinate halfSidePoint2 = new Coordinate
+			(
+				(int) Math.round(((double) (this.vertex3.getX() + this.vertex4.getX())) / 2),
+				this.vertex3.getY()
+			)
+		;
+		Vector halfSideMov = new Vector(halfSidePoint1, halfSidePoint2);
+		halfSideMov.multiplyByScalar(0.5);
+		halfSidePoint1.move(halfSideMov);
+		return halfSidePoint1;
 	}
 
 }

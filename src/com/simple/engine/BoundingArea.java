@@ -13,6 +13,8 @@ public abstract class BoundingArea {
 	
 	public abstract void move(Vector offset);
 	
+	public abstract BoundingArea spin(float angle);
+	
 	public String getTag() {
 		return tag;
 	}

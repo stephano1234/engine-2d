@@ -61,10 +61,10 @@ public abstract class GameRunner {
 	private void processGameObjects(Input input) {
 		this.clearGameObjectsOffsets();
 		this.processGameObjectsOffsetsChanges(input);
-		this.synchronizeAttachedGameObjectsOffsets();
+		this.synchronizeAttachedGameObjectsOffsetsAndAngles();
 		this.processGameObjectsBoundingAreasInteractions();
 		this.processGameObjectsImagesAnimations(input);
-		this.updateGameObjectsPosition();
+		this.updateGameObjectsPositionAndAngle();
 	}
 	
 	private void renderGameObjects(Renderer renderer) {
@@ -98,15 +98,15 @@ public abstract class GameRunner {
 		}
 	}
 
-	private void synchronizeAttachedGameObjectsOffsets() {
+	private void synchronizeAttachedGameObjectsOffsetsAndAngles() {
 		for (GameObject gameObject : this.gameObjects) {
-			gameObject.synchronizeOffsetWithAttachedGameObject();
+			gameObject.synchronizeOffsetAndAngleWithAttachedGameObject();
 		}
 	}
 	
-	private void updateGameObjectsPosition() {
+	private void updateGameObjectsPositionAndAngle() {
 		for (GameObject gameObject : this.gameObjects) {
-			gameObject.updatePosition();
+			gameObject.updatePositionAndAngle();
 		}
 	}
 

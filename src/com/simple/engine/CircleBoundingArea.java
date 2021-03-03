@@ -17,6 +17,12 @@ public class CircleBoundingArea extends BoundingArea {
 		this.center.move(offset);
 	}
 
+	@Override
+	public CircleBoundingArea spin(float angle) {
+		// a spin in a circle makes no effect in the positioning of its bounding area
+		return this;
+	}
+
 	public Coordinate getCenter() {
 		return center;
 	}

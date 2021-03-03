@@ -4,7 +4,9 @@ public class Calculator {
 
 	private Calculator() {}
 	
-	public static double[][] getRotationMatrix(float rad, int centerX, int centerY) {
+	public static double[][] getRotationMatrix(float rad, Coordinate center) {
+		int centerX = center.getX();
+		int centerY = center.getY();
 		double[][] matrix = new double[3][3];
 		double cosRad = Math.cos(rad);
 		double sinRad = Math.sin(rad);
@@ -52,6 +54,15 @@ public class Calculator {
 		return (int) Math.round(matrix[1][0] * x + matrix[1][1] * y + matrix[1][2]);
 	}
 
+	public static Coordinate get3x3MatrixProduct(double[][] matrix, Coordinate coordinate) {
+		return new Coordinate
+			(
+				(int) Math.round(matrix[0][0] * coordinate.getX() + matrix[0][1] * coordinate.getY() + matrix[0][2]),
+				(int) Math.round(matrix[1][0] * coordinate.getX() + matrix[1][1] * coordinate.getY() + matrix[1][2])
+			)
+		;
+	}
+
 	public static int[][] getInverse2x2Matrix(int[][] matrix) {
 		int[][] inverseMatrix = new int[2][2];
 		int inverseMatrixDet = 1 / (matrix[0][0] * matrix[1][1] * - matrix[0][1] * matrix[1][0]);
@@ -69,7 +80,7 @@ public class Calculator {
 	public static int get2x2MatrixProductY(int[][] matrix, int x, int y) {
 		return matrix[1][0] * x + matrix[1][1] * y;
 	}
-	
+
 	public static Vector getPerpendicularVector(Vector vector) {
 		return new Vector(vector.getY(), -vector.getX());
 	}

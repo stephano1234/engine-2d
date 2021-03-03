@@ -54,8 +54,8 @@ public class BoundingAreasInteractionsResolver {
 	private static void resolveCollisionInteraction(BoundingArea boundingArea1, BoundingArea boundingArea2) {
 		// convex polygon X convex polygon
 		if (boundingArea1 instanceof ConvexPolygon && boundingArea2 instanceof ConvexPolygon) {
-			ConvexPolygon convexPolygon1 = (ConvexPolygon) boundingArea1;
-			ConvexPolygon convexPolygon2 = (ConvexPolygon) boundingArea2;
+			ConvexPolygon convexPolygon1 = (ConvexPolygon) boundingArea1.spin(boundingArea1.getGameObject().getAngle());
+			ConvexPolygon convexPolygon2 = (ConvexPolygon) boundingArea2.spin(boundingArea2.getGameObject().getAngle());
 			Vector minimumDistanceVector = null;
 			int minimumDistanceValue = Integer.MAX_VALUE;
 			List<Coordinate> vertices1 = convexPolygon1.getVertices();
@@ -117,15 +117,15 @@ public class BoundingAreasInteractionsResolver {
 			if (minimumDistanceVector != null) {
 				minimumDistanceVector.multiplyByScalar(minimumDistanceValue / Math.pow(minimumDistanceVector.getNorm(), 2));
 				boundingArea2.move(minimumDistanceVector);
-				boundingArea2.getGameObject().getOffset().plus(minimumDistanceVector);
+				boundingArea2.getGameObject().getLinearOffset().plus(minimumDistanceVector);
 			}
 			boundingArea1.getGameObject().applyCollisionInteractionEvent(boundingArea2);
 			boundingArea2.getGameObject().applyCollisionInteractionEvent(boundingArea1);
 		}
 		//convex polygon X circle
 		if (!(boundingArea1 instanceof ConvexPolygon) && boundingArea2 instanceof ConvexPolygon) {
-			CircleBoundingArea circleBoundingArea1 = (CircleBoundingArea) boundingArea1;
-			ConvexPolygon convexPolygon2 = (ConvexPolygon) boundingArea2;
+			CircleBoundingArea circleBoundingArea1 = (CircleBoundingArea) boundingArea1.spin(boundingArea1.getGameObject().getAngle());
+			ConvexPolygon convexPolygon2 = (ConvexPolygon) boundingArea2.spin(boundingArea2.getGameObject().getAngle());
 			Vector minimumDistanceVector = null;
 			double minimumDistanceValue = Integer.MAX_VALUE;
 			Coordinate circleCenter1 = circleBoundingArea1.getCenter();
@@ -180,14 +180,14 @@ public class BoundingAreasInteractionsResolver {
 			if (minimumDistanceVector != null) {
 				minimumDistanceVector.multiplyByScalar(minimumDistanceValue / Math.pow(minimumDistanceVector.getNorm(), 2));
 				boundingArea2.move(minimumDistanceVector);
-				boundingArea2.getGameObject().getOffset().plus(minimumDistanceVector);
+				boundingArea2.getGameObject().getLinearOffset().plus(minimumDistanceVector);
 			}
 			boundingArea1.getGameObject().applyCollisionInteractionEvent(boundingArea2);
 			boundingArea2.getGameObject().applyCollisionInteractionEvent(boundingArea1);
 		}
 		if (!(boundingArea2 instanceof ConvexPolygon) && boundingArea1 instanceof ConvexPolygon) {
-			ConvexPolygon convexPolygon1 = (ConvexPolygon) boundingArea1;
-			CircleBoundingArea circleBoundingArea2 = (CircleBoundingArea) boundingArea2;
+			ConvexPolygon convexPolygon1 = (ConvexPolygon) boundingArea1.spin(boundingArea1.getGameObject().getAngle());
+			CircleBoundingArea circleBoundingArea2 = (CircleBoundingArea) boundingArea2.spin(boundingArea2.getGameObject().getAngle());
 			Vector minimumDistanceVector = null;
 			double minimumDistanceValue = Integer.MAX_VALUE;
 			List<Coordinate> vertices1 = convexPolygon1.getVertices();
@@ -242,7 +242,7 @@ public class BoundingAreasInteractionsResolver {
 			if (minimumDistanceVector != null) {
 				minimumDistanceVector.multiplyByScalar(minimumDistanceValue / Math.pow(minimumDistanceVector.getNorm(), 2));
 				boundingArea2.move(minimumDistanceVector);
-				boundingArea2.getGameObject().getOffset().plus(minimumDistanceVector);
+				boundingArea2.getGameObject().getLinearOffset().plus(minimumDistanceVector);
 			}
 			boundingArea1.getGameObject().applyCollisionInteractionEvent(boundingArea2);
 			boundingArea2.getGameObject().applyCollisionInteractionEvent(boundingArea1);
@@ -251,10 +251,10 @@ public class BoundingAreasInteractionsResolver {
 		if (!(boundingArea1 instanceof ConvexPolygon) && !(boundingArea2 instanceof ConvexPolygon)) {
 			Vector minimumDistanceVector = null;
 			double minimumDistanceValue = Integer.MAX_VALUE;
-			CircleBoundingArea circleBoundingArea1 = (CircleBoundingArea) boundingArea1;
+			CircleBoundingArea circleBoundingArea1 = (CircleBoundingArea) boundingArea1.spin(boundingArea1.getGameObject().getAngle());
 			Coordinate circleCenter1 = circleBoundingArea1.getCenter();
 			int circleRadius1 = circleBoundingArea1.getRadius();
-			CircleBoundingArea circleBoundingArea2 = (CircleBoundingArea) boundingArea2;
+			CircleBoundingArea circleBoundingArea2 = (CircleBoundingArea) boundingArea2.spin(boundingArea2.getGameObject().getAngle());
 			Coordinate circleCenter2 = circleBoundingArea2.getCenter();
 			int circleRadius2 = circleBoundingArea2.getRadius();
 			minimumDistanceVector = new Vector(circleCenter1, circleCenter2); 
@@ -265,7 +265,7 @@ public class BoundingAreasInteractionsResolver {
 			}
 			minimumDistanceVector.multiplyByScalar(minimumDistanceValue / distanceBetweenCenters);
 			boundingArea2.move(minimumDistanceVector);
-			boundingArea2.getGameObject().getOffset().plus(minimumDistanceVector);
+			boundingArea2.getGameObject().getLinearOffset().plus(minimumDistanceVector);
 			boundingArea1.getGameObject().applyCollisionInteractionEvent(boundingArea2);
 			boundingArea2.getGameObject().applyCollisionInteractionEvent(boundingArea1);
 		}

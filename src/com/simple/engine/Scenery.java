@@ -13,7 +13,7 @@ public class Scenery {
 	public void render(Renderer renderer) {
 		if (this.backgroundImage != null) {			
 			renderer.setZDepth(Integer.MAX_VALUE);
-			renderer.drawImage(this.backgroundImage, 0, 0, false);		
+			renderer.drawImage(this.backgroundImage, 0, 0, 0f, false);		
 		}
 	}
 	

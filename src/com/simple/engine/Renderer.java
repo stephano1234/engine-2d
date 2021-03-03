@@ -279,20 +279,45 @@ public class Renderer {
 		// adjusts the offsets based on the camera position
 		pixelX -= this.camX;
 		pixelY -= this.camY;
+		int width = img.getWidth();
+		int height = img.getHeight();
+		// get the rotational matrix and its inverse
+		int halfWidth = width / 2;
+		int halfHeight = height / 2;
+		double[][] rotationMatrix = Calculator.getRotationMatrix(angle, new Coordinate(halfWidth, halfHeight));
+		double[][] inverseRotationMatrix = Calculator.getInverse3x3Matrix(rotationMatrix);
+		// stock the target render area
+		int targetWidth = width;
+		int targetHeight = height;
+		// calculate the enlarged render area
+		int rotX1 = Calculator.get3x3MatrixProductX(rotationMatrix, 0, 0);
+		int rotY1 = Calculator.get3x3MatrixProductY(rotationMatrix, 0, 0);
+		int rotX2 = Calculator.get3x3MatrixProductX(rotationMatrix, width, 0);
+		int rotY2 = Calculator.get3x3MatrixProductY(rotationMatrix, width, 0);
+		int rotX3 = Calculator.get3x3MatrixProductX(rotationMatrix, 0, height);
+		int rotY3 = Calculator.get3x3MatrixProductY(rotationMatrix, 0, height);
+		int rotX4 = Calculator.get3x3MatrixProductX(rotationMatrix, width, height);
+		int rotY4 = Calculator.get3x3MatrixProductY(rotationMatrix, width, height);
+		int minRotatedCoordX = Math.min(Math.min(rotX1, rotX2), Math.min(rotX3, rotX4));
+		int minRotatedCoordY = Math.min(Math.min(rotY1, rotY2), Math.min(rotY3, rotY4));
+		int maxRotatedCoordX = Math.max(Math.max(rotX1, rotX2), Math.max(rotX3, rotX4));
+		int maxRotatedCoordY = Math.max(Math.max(rotY1, rotY2), Math.max(rotY3, rotY4));
+		width = Math.abs(minRotatedCoordX - maxRotatedCoordX);
+		height = Math.abs(minRotatedCoordY - maxRotatedCoordY);
 		// validating image screen position
-		if (pixelX < -img.getWidth())
+		if (pixelX < -width)
 			return;
-		if (pixelY < -img.getHeight())
+		if (pixelY < -height)
 			return;
 		if (pixelX >= this.pixelsWidth)
 			return;
 		if (pixelY >= this.pixelsHeight)
 			return;
 		// clipping image on screen size
-		int renderWidth = img.getWidth();
-		int renderHeight = img.getHeight();
-		int renderInitialX = 0;
-		int renderInitialY = 0;
+		int renderWidth = width + minRotatedCoordX;
+		int renderHeight = height + minRotatedCoordY;
+		int renderInitialX = minRotatedCoordX;
+		int renderInitialY = minRotatedCoordY;
 		if (pixelX < 0)
 			renderInitialX -= pixelX;
 		if (pixelY < 0)
@@ -304,8 +329,12 @@ public class Renderer {
 		// draw pixels
 		for (int x = renderInitialX; x < renderWidth; x++) {
 			for (int y = renderInitialY; y < renderHeight; y++) {
-				this.setPixel(x + pixelX, y + pixelY, img.getPixels()[y * img.getWidth() + x]);
-				this.setPixelLightBlock(x + pixelX, y + pixelY, blockLight);
+				int targetX = Calculator.get3x3MatrixProductX(inverseRotationMatrix, x, y);
+				int targetY = Calculator.get3x3MatrixProductY(inverseRotationMatrix, x, y);
+				if (targetX >= 0 && targetX < targetWidth && targetY >= 0 && targetY < targetHeight) {					
+					this.setPixel(x + pixelX, y + pixelY, img.getPixels()[targetY * targetWidth + targetX]);
+					this.setPixelLightBlock(x + pixelX, y + pixelY, blockLight);
+				}
 			}
 		}
 	}
@@ -353,45 +382,10 @@ public class Renderer {
 		// adjusts the offsets based on the camera position
 		pixelX -= this.camX;
 		pixelY -= this.camY;
-		// validating image screen position
-		if (pixelX < -width)
-			return;
-		if (pixelY < -height)
-			return;
-		if (pixelX >= this.pixelsWidth)
-			return;
-		if (pixelY >= this.pixelsHeight)
-			return;
-		// clipping image on screen size
-		int renderWidth = width;
-		int renderHeight = height;
-		int renderInitialX = 0;
-		int renderInitialY = 0;
-		if (pixelX < 0)
-			renderInitialX -= pixelX;
-		if (pixelY < 0)
-			renderInitialY -= pixelY;
-		if (pixelX + renderWidth > this.pixelsWidth)
-			renderWidth = this.pixelsWidth - pixelX;
-		if (pixelY + renderHeight > this.pixelsHeight)
-			renderHeight = this.pixelsHeight - pixelY;
-		// draw pixels
-		for (int x = renderInitialX; x < renderWidth; x++) {
-			for (int y = renderInitialY; y < renderHeight; y++) {
-				this.setPixel(x + pixelX, y + pixelY, color);
-				this.setPixelLightBlock(x + pixelX, y + pixelY, blockLight);
-			}
-		}
-	}
-
-	public void drawRectAreaWithRotation(int width, int height, int color, int pixelX, int pixelY, float rad, boolean blockLight) {
-		// adjusts the offsets based on the camera position
-		pixelX -= this.camX;
-		pixelY -= this.camY;
 		// get the rotational matrix and its inverse
 		int halfWidth = width / 2;
 		int halfHeight = height / 2;
-		double[][] rotationMatrix = Calculator.getRotationMatrix(rad, new Coordinate(halfWidth, halfHeight));
+		double[][] rotationMatrix = Calculator.getRotationMatrix(angle, new Coordinate(halfWidth, halfHeight));
 		double[][] inverseRotationMatrix = Calculator.getInverse3x3Matrix(rotationMatrix);
 		// stock the target render area
 		int targetWidth = width;
@@ -462,8 +456,8 @@ public class Renderer {
 			;
 			break;
 		case 1:
-			rotationMatrix = Calculator.getRotationMatrix(angle, new Coordinate(
-						(int) Math.round((width * 2) / 3.0), 
+			rotationMatrix = Calculator.getRotationMatrix(-angle, new Coordinate(
+						(int) Math.round(width / 3.0), 
 						(int) Math.round((height * 2) / 3.0)
 					)
 				)
@@ -471,14 +465,14 @@ public class Renderer {
 			break;
 		case 2:
 			rotationMatrix = Calculator.getRotationMatrix(angle, new Coordinate(
-						(int) Math.round((width * 2) / 3.0), 
-						(int) Math.round(height / 3.0)
+						(int) Math.round(width / 3.0), 
+						(int) Math.round((height * 2) / 3.0)
 					)
 				)
 			;
 			break;
 		case 3:
-			rotationMatrix = Calculator.getRotationMatrix(angle, new Coordinate(
+			rotationMatrix = Calculator.getRotationMatrix(-angle, new Coordinate(
 						(int) Math.round((width * 2) / 3.0), 
 						(int) Math.round(height / 3.0)
 					)
@@ -546,36 +540,38 @@ public class Renderer {
 			}			
 			break;
 		case 1:
-			for (int x = renderWidth - 1; x > renderInitialX - 1; x--) {
-				for (int y = renderHeight - 1; y > renderInitialY - 1; y--) {
+			for (int x = renderInitialX; x < renderWidth; x++) {
+				for (int y = renderInitialY; y < renderHeight; y++) {
 					int targetX = Calculator.get3x3MatrixProductX(inverseRotationMatrix, x, y);
 					int targetY = Calculator.get3x3MatrixProductY(inverseRotationMatrix, x, y);
 					if (targetX >= 0 && targetX < targetWidth && targetY >= 0 && targetY < targetHeight && targetY >= targetX * c) {																
-						this.setPixel((renderWidth - 1) - x + pixelX, y + pixelY, color);
-						this.setPixelLightBlock((renderWidth - 1) - x + pixelX, y + pixelY, blockLight);
+						this.setPixel((targetWidth - 1) - x + pixelX, y + pixelY, color);
+						this.setPixelLightBlock((targetWidth - 1) - x + pixelX, y + pixelY, blockLight);
 					}
 				}
 			}			
 			break;
 		case 2:
 			for (int x = renderInitialX; x < renderWidth; x++) {
-				for (int y = renderHeight - 1; y >= x * c && y > renderInitialY - 1; y--) {
+				for (int y = renderInitialY; y < renderHeight; y++) {
 					int targetX = Calculator.get3x3MatrixProductX(inverseRotationMatrix, x, y);
 					int targetY = Calculator.get3x3MatrixProductY(inverseRotationMatrix, x, y);
-
-					this.setPixel(x + pixelX, y + pixelY, color);
-					this.setPixelLightBlock(x + pixelX, y + pixelY, blockLight);
+					if (targetX >= 0 && targetX < targetWidth && targetY >= 0 && targetY < targetHeight && targetY >= targetX * c) {																
+						this.setPixel(x + pixelX, y + pixelY, color);
+						this.setPixelLightBlock(x + pixelX, y + pixelY, blockLight);
+					}
 				}
 			}			
 			break;
 		case 3:
 			for (int x = renderWidth - 1; x > renderInitialX - 1; x--) {
-				for (int y = renderInitialY; y <= x * c && y < renderHeight; y++) {
+				for (int y = renderInitialY; y < renderHeight; y++) {
 					int targetX = Calculator.get3x3MatrixProductX(inverseRotationMatrix, x, y);
 					int targetY = Calculator.get3x3MatrixProductY(inverseRotationMatrix, x, y);
-
-					this.setPixel((renderWidth - 1) - x + pixelX, y + pixelY, color);
-					this.setPixelLightBlock((renderWidth - 1) - x + pixelX, y + pixelY, blockLight);
+					if (targetX >= 0 && targetX < targetWidth && targetY >= 0 && targetY < targetHeight && targetY <= targetX * c) {																
+						this.setPixel((targetWidth - 1) - x + pixelX, y + pixelY, color);
+						this.setPixelLightBlock((targetWidth - 1) - x + pixelX, y + pixelY, blockLight);
+					}
 				}
 			}			
 			break;

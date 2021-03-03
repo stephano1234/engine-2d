@@ -129,12 +129,40 @@ public abstract class GameObject {
 		this.boundingAreas.add(new CircleBoundingArea(tag, this, center, radius));
 	}
 
-	protected void addFittingTriangularBoundingArea(String tag) {
-		this.addTriangularBoundingArea(tag, 
-			new Coordinate(this.position.getX() - this.halfWidth, this.position.getY() - this.halfHeight), 
-			new Coordinate(this.position.getX() + this.halfWidth, this.position.getY() - this.halfHeight), 
-			new Coordinate(this.position.getX() + this.halfWidth, this.position.getY() + this.halfHeight)
-		);
+	protected void addFittingTriangularBoundingArea(String tag, int mode) {
+		switch (mode) {
+		case 0:
+			this.addTriangularBoundingArea(tag, 
+				new Coordinate(this.position.getX() - this.halfWidth, this.position.getY() - this.halfHeight), 
+				new Coordinate(this.position.getX() + this.halfWidth, this.position.getY() - this.halfHeight), 
+				new Coordinate(this.position.getX() + this.halfWidth, this.position.getY() + this.halfHeight)
+			);			
+			break;
+		case 1:
+			this.addTriangularBoundingArea(tag, 
+				new Coordinate(this.position.getX() + this.halfWidth, this.position.getY() - this.halfHeight), 
+				new Coordinate(this.position.getX() + this.halfWidth, this.position.getY() + this.halfHeight), 
+				new Coordinate(this.position.getX() - this.halfWidth, this.position.getY() + this.halfHeight)
+			);			
+			break;
+		case 2:
+			this.addTriangularBoundingArea(tag, 
+				new Coordinate(this.position.getX() - this.halfWidth, this.position.getY() - this.halfHeight), 
+				new Coordinate(this.position.getX() - this.halfWidth, this.position.getY() + this.halfHeight), 
+				new Coordinate(this.position.getX() + this.halfWidth, this.position.getY() + this.halfHeight)
+			);			
+			break;
+		case 3:
+			this.addTriangularBoundingArea(tag, 
+				new Coordinate(this.position.getX() - this.halfWidth, this.position.getY() - this.halfHeight), 
+				new Coordinate(this.position.getX() + this.halfWidth, this.position.getY() - this.halfHeight), 
+				new Coordinate(this.position.getX() - this.halfWidth, this.position.getY() + this.halfHeight)
+			);			
+			break;
+		default:
+			// put a log of error, because no available mode was chosen
+			break;
+		}
 	}
 
 	protected void addFittingRectangleBoundingArea(String tag) {

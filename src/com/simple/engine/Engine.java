@@ -54,7 +54,7 @@ public class Engine implements Runnable {
 		
 		while (this.running) {
 			
-			render = true;
+			render = false;
 			
 			thisTime = System.nanoTime() / 1000000000.0;
 			passedTime = thisTime - lastTime;

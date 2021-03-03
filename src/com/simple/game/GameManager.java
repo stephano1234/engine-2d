@@ -12,13 +12,15 @@ public class GameManager extends GameRunner {
 
 		super();
 		
-		this.addGameObject(new TestGira("gira-gira", 32 * 3, 64 * 3, 300, 390));
+		this.addGameObject(new TestGira("gira-gira", 32 * 5, 64 * 5, 300, 390));
 
-		this.addGameObject(new TestObj(200, 200));
+//		this.addGameObject(new TestObj(200, 200));
+		
+		this.addGameObject(new TestObj());
 		
 		Scenery scenery = new Scenery("fase teste");
 		
-		scenery.setBackgroundImage("/images/landscape-test.png");
+//		scenery.setBackgroundImage("/images/landscape-test.png");
 		
 		this.addScenery(scenery);
 		
@@ -43,6 +45,7 @@ public class GameManager extends GameRunner {
 
 	@Override
 	protected void defineFrame(Renderer renderer) {
+		renderer.setBackgroundColor(0xff5555ff);
 		renderer.setAmbientLightness(0xffffffff);
 	}
 

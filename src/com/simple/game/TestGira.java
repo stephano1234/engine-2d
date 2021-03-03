@@ -17,15 +17,15 @@ public class TestGira extends GameObject {
 	@Override
 	public void processControlBasedOffsetsChanges(Input input) {
 		
-		if (input.isKey(KeyEvent.VK_A)) {
-			this.spinClock(0.02f);
-		}
+//		if (input.isKey(KeyEvent.VK_A)) {
+//			this.spinClock(0.02f);
+//		}
 		
 	}
 	
 	@Override
 	public void renderObject(Renderer renderer) {
-		renderer.drawRectAreaWithRotation(this.width, this.height, 0xff00ff00, this.position.getX() - this.halfWidth, this.position.getY() - this.halfHeight, this.angle, false);
+		renderer.drawRectArea(this.width, this.height, 0xff00ff00, this.position.getX() - this.halfWidth, this.position.getY() - this.halfHeight, this.angle, false);
 	}
 
 }

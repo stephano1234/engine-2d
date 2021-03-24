@@ -70,7 +70,7 @@ public class Engine implements Runnable {
 
 				render = true;
 				
-				// update the game logical state
+				// process all the game's logical events
 				this.gameRunner.processGameEvents(this.input);
 				
 				// feed last game controls state

@@ -4,11 +4,11 @@ import java.util.List;
 
 public class Vector {
 
-	private int x;
+	private double x;
 
-	private int y;
+	private double y;
 
-	public Vector(int x, int y) {
+	public Vector(double x, double y) {
 		this.x = x;
 		this.y = y;
 	}
@@ -19,8 +19,8 @@ public class Vector {
 	}
 
 	public void multiplyByScalar(double scalar) {
-		this.x = (int) Math.round(this.x * scalar);
-		this.y = (int) Math.round(this.y * scalar);
+		this.x = this.x * scalar;
+		this.y = this.y * scalar;
 	}
 
 	public void plus(Vector other) {
@@ -36,22 +36,22 @@ public class Vector {
 	}
 
 	public double getNorm() {
-		return Math.sqrt((double) (this.x * this.x + this.y * this.y));
+		return Math.sqrt((this.x * this.x + this.y * this.y));
 	}
 	
-	public int getX() {
+	public double getX() {
 		return x;
 	}
 
-	public void setX(int x) {
+	public void setX(double x) {
 		this.x = x;
 	}
 
-	public int getY() {
+	public double getY() {
 		return y;
 	}
 
-	public void setY(int y) {
+	public void setY(double y) {
 		this.y = y;
 	}
 

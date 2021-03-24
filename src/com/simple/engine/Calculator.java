@@ -4,9 +4,9 @@ public class Calculator {
 
 	private Calculator() {}
 	
-	public static double[][] getRotationMatrix(float rad, Coordinate center) {
-		int centerX = center.getX();
-		int centerY = center.getY();
+	public static double[][] getRotationMatrix(double rad, Coordinate center) {
+		double centerX = center.getX();
+		double centerY = center.getY();
 		double[][] matrix = new double[3][3];
 		double cosRad = Math.cos(rad);
 		double sinRad = Math.sin(rad);
@@ -57,41 +57,27 @@ public class Calculator {
 	public static Coordinate get3x3MatrixProduct(double[][] matrix, Coordinate coordinate) {
 		return new Coordinate
 			(
-				(int) Math.round(matrix[0][0] * coordinate.getX() + matrix[0][1] * coordinate.getY() + matrix[0][2]),
-				(int) Math.round(matrix[1][0] * coordinate.getX() + matrix[1][1] * coordinate.getY() + matrix[1][2])
+				matrix[0][0] * coordinate.getX() + matrix[0][1] * coordinate.getY() + matrix[0][2],
+				matrix[1][0] * coordinate.getX() + matrix[1][1] * coordinate.getY() + matrix[1][2]
 			)
 		;
 	}
 
-	public static int[][] getInverse2x2Matrix(int[][] matrix) {
-		int[][] inverseMatrix = new int[2][2];
-		int inverseMatrixDet = 1 / (matrix[0][0] * matrix[1][1] * - matrix[0][1] * matrix[1][0]);
-		inverseMatrix[0][0] = inverseMatrixDet * matrix[1][1];
-		inverseMatrix[0][1] = inverseMatrixDet * (-matrix[0][1]);
-		inverseMatrix[1][0] = inverseMatrixDet * (-matrix[1][0]);
-		inverseMatrix[1][1] = inverseMatrixDet * matrix[0][0];
-		return inverseMatrix;
-	}
-
-	public static int get2x2MatrixProductX(int[][] matrix, int x, int y) {
-		return matrix[0][0] * x + matrix[0][1] * y;
-	}
-
-	public static int get2x2MatrixProductY(int[][] matrix, int x, int y) {
-		return matrix[1][0] * x + matrix[1][1] * y;
-	}
-
-	public static Vector getPerpendicularVector(Vector vector) {
+	public static Vector getRightPerpendicularVector(Vector vector) {
 		return new Vector(vector.getY(), -vector.getX());
 	}
-	
-	public static int dotProduct(Vector vector1, Vector vector2) {
+
+	public static Vector getLeftPerpendicularVector(Vector vector) {
+		return new Vector(-vector.getY(), vector.getX());
+	}
+
+	public static double dotProduct(Vector vector1, Vector vector2) {
 		return vector1.getX() * vector2.getX() + vector1.getY() * vector2.getY();
 	}
 	
 	public static Vector getUnitaryVector(Vector vector) {
 		double norm = vector.getNorm();
-		return new Vector((int) Math.round(vector.getX() / norm), (int) Math.round(vector.getY() / norm));
+		return new Vector(vector.getX() / norm, vector.getY() / norm);
 	}
 	
 }

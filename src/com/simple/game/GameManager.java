@@ -4,36 +4,30 @@ import com.simple.engine.Engine;
 import com.simple.engine.GameRunner;
 import com.simple.engine.Input;
 import com.simple.engine.Renderer;
-import com.simple.engine.Scenery;
 
 public class GameManager extends GameRunner {
 		
-	public GameManager() {
-
-		super();
-		
-		this.addGameObject(new TestGira("gira-gira", 32 * 5, 64 * 5, 300, 390));
-
-//		this.addGameObject(new TestObj(200, 200));
-		
-		this.addGameObject(new TestObj());
-		
-		Scenery scenery = new Scenery("fase teste");
-		
-//		scenery.setBackgroundImage("/images/landscape-test.png");
-		
-		this.addScenery(scenery);
-		
-		this.setCurrentSceneryTag(scenery.getTag());
-		
-		this.setGameObjectFixedCamera("triTeste");
+	private int scale;
 	
+	public GameManager() {
+		super();
+		this.scale = 3;
+		this.addGameObject(new TestRectangle("east-wall", 16 * this.scale, 240 * this.scale, 312 * this.scale, 120 * this.scale, 0xff0000ff, false));
+		this.addGameObject(new TestRectangle("west-wall", 16 * this.scale, 240 * this.scale, 8 * this.scale, 120 * this.scale, 0xff0000ff, false));
+		this.addGameObject(new TestRectangle("north-wall", 288 * this.scale, 16 * this.scale, 160 * this.scale, 8 * this.scale, 0xff0000ff, false));
+		this.addGameObject(new TestRectangle("south-wall", 288 * this.scale, 16 * this.scale, 160 * this.scale, 232 * this.scale, 0xff0000ff, false));
+		this.addGameObject(new TestCircle("testCircle", 16 * this.scale, -100 * this.scale, -100 * this.scale, 0xff00ff00, true));
+		this.setGameObjectFixedCamera("testCircle");
+
+//		this.addGameObject(new Room());
+//		this.addGameObject(new Character(100, 80));
+//		this.setGameObjectFixedCamera("character");			
 	}
 
 	@Override
 	protected void setWindowConfig(Engine engine) {
-		engine.setWidth(640);
-		engine.setHeight(480);
+		engine.setWidth(320 * this.scale);
+		engine.setHeight(240 * this.scale);
 		engine.setScale(1f);
 		engine.setTitle("My Game");
 	}

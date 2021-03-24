@@ -34,7 +34,7 @@ public class TriangleBoundingArea extends BoundingArea implements ConvexPolygon 
 	}
 
 	@Override
-	public TriangleBoundingArea spin(float angle) {
+	public TriangleBoundingArea spin(double angle) {
 		double[][] spinMatrix = Calculator.getRotationMatrix(angle, this.getCenter());
 		TriangleBoundingArea rotatedBoundingArea = new TriangleBoundingArea(this.tag + "#spinCopy", this.gameObject, this.vertex1, this.vertex2, this.vertex3);
 		rotatedBoundingArea.changeVertices
@@ -94,8 +94,8 @@ public class TriangleBoundingArea extends BoundingArea implements ConvexPolygon 
 	public Coordinate getCenter() {
 		return new Coordinate
 			(
-				(int) Math.round(((double) (this.vertex1.getX() + this.vertex2.getX() + this.vertex3.getX())) / 3),
-				(int) Math.round(((double) (this.vertex1.getY() + this.vertex2.getY() + this.vertex3.getY())) / 3)
+				(this.vertex1.getX() + this.vertex2.getX() + this.vertex3.getX()) / 3.0,
+				(this.vertex1.getY() + this.vertex2.getY() + this.vertex3.getY()) / 3.0
 			)
 		;
 	}

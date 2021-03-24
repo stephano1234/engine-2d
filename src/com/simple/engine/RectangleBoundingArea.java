@@ -39,7 +39,7 @@ public class RectangleBoundingArea extends BoundingArea implements ConvexPolygon
 	}
 
 	@Override
-	public RectangleBoundingArea spin(float angularOffset) {
+	public RectangleBoundingArea spin(double angularOffset) {
 		double[][] spinMatrix = Calculator.getRotationMatrix(angularOffset, this.getCenter());
 		RectangleBoundingArea rotatedBoundingArea = new RectangleBoundingArea(this.tag + "#spinCopy", this.gameObject, this.vertex1, this.vertex2, this.vertex3, this.vertex4);
 		rotatedBoundingArea.changeVertices
@@ -110,13 +110,13 @@ public class RectangleBoundingArea extends BoundingArea implements ConvexPolygon
 	public Coordinate getCenter() {
 		Coordinate halfSidePoint1 = new Coordinate
 			(
-				(int) Math.round(((double) (this.vertex1.getX() + this.vertex2.getX())) / 2),
+				(this.vertex1.getX() + this.vertex2.getX()) / 2.0,
 				this.vertex1.getY()
 			)
 		;
 		Coordinate halfSidePoint2 = new Coordinate
 			(
-				(int) Math.round(((double) (this.vertex3.getX() + this.vertex4.getX())) / 2),
+				(this.vertex3.getX() + this.vertex4.getX()) / 2.0,
 				this.vertex3.getY()
 			)
 		;

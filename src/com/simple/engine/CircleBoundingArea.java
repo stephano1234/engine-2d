@@ -18,7 +18,7 @@ public class CircleBoundingArea extends BoundingArea {
 	}
 
 	@Override
-	public CircleBoundingArea spin(float angle) {
+	public CircleBoundingArea spin(double angle) {
 		// a spin in a circle makes no effect in the positioning of its bounding area
 		return this;
 	}

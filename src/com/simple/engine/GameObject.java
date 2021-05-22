@@ -308,10 +308,6 @@ public abstract class GameObject {
 				renderer.drawMinThicknessLine(rectangleBoundingArea.getVertex3().getX(), rectangleBoundingArea.getVertex3().getY(), rectangleBoundingArea.getVertex4().getX(), rectangleBoundingArea.getVertex4().getY(), color);
 				renderer.drawMinThicknessLine(rectangleBoundingArea.getVertex4().getX(), rectangleBoundingArea.getVertex4().getY(), rectangleBoundingArea.getVertex1().getX(), rectangleBoundingArea.getVertex1().getY(), color);
 			}
-			if (boundingArea instanceof CircleBoundingArea) {				
-				CircleBoundingArea circleBoundingArea = (CircleBoundingArea) boundingArea.spin(this.angle);
-
-			}			
 		}
 	}
 	

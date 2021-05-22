@@ -36,16 +36,11 @@ public class Room extends GameObject {
 				new Coordinate(0, 240) 
 			)
 		;
-		this.addCollidingCircleBoundingArea("center", new Coordinate(160, 120), 20);
 	}
 
 	@Override
 	public void renderObject(Renderer renderer) {
-//		renderer.setZDepth(Integer.MAX_VALUE);
 		renderer.drawImage(this.staticImage, 0, 0, 0, false);
-//		renderer.setZDepth(0);
-		renderer.drawCircleArea(20, 0xff0000ff, 140, 100, false);
-//		this.showBoundingAreasBorders(renderer, 0xffff0000);
 	}
 
 }
